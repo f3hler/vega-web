@@ -44,8 +44,6 @@ HotKeySet("x", "VEGA_exit")
 HotKeySet("{F6}","Quit")
 Global $VEGA_win[2]	;VEGA winhandle and control if any
 Global $VEGA_win_pos[4];=WinGetPos  ( "VEGA 55Conflict" )
-;Global $button_BP[0]=
-;Global $button_BP[1]=
 Global $cap_left_game_img
 $cap_left_game_img='img\cap_left_deck.gif'
 Global $btn_reload_game[2]
@@ -145,7 +143,6 @@ while 1 ;main loop
 ;~    for $i=$fleetActive_b to $fleetActive_e step 1 ;for $i=0 to 6 step 1
 	For $i=1 To $fleetActive[0]
 		local $currentFleet = $fleetActive[$i]
-;~ 		ConsoleWrite('$currentFleet '& $currentFleet&@CRLF)
 	  ; 0 = empty fleet
 	  ; 1 = in port ok
 	  ; 2 = in port damaged
@@ -222,519 +219,479 @@ WEnd
 EndFunc
 
 Func SetFleetMenu() ;set fleet menu to correct state
-	  ;find fleet menu $btn_Fleet_img[10]
-ConsoleWrite (@CRLF&'|'&$VEGA_win_pos[0]&'|'&$VEGA_win_pos[1]&'|'&$VEGA_win_pos[2]&'|'&$VEGA_win_pos[3]&'|'&@CRLF)
+	;find fleet menu $btn_Fleet_img[10]
+	ConsoleWrite (@CRLF&'|'&$VEGA_win_pos[0]&'|'&$VEGA_win_pos[1]&'|'&$VEGA_win_pos[2]&'|'&$VEGA_win_pos[3]&'|'&@CRLF)
 
 
-local $x
-local $y
-Local $search = _ImageSearchArea($btn_Fleet_menu_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 90 )
-   If $search = 1 Then
-	  ConsoleWrite("fleet menu at "&$x&":"&$y&@CRLF)
-	  local $i
-	  for $i=0 To 2 step 1
-		 ConsoleWrite ('check menu at position:'&$i&' must be in '&$btn_Fleet_menu[$i][0]&'<'&$x&'<'&$btn_Fleet_menu[$i][1]&@CRLF)
-		 if ($x <= $btn_Fleet_menu[$i][1]) and ($x >= $btn_Fleet_menu[$i][0]) Then
-			ConsoleWrite ('menu position is '&$i&@CRLF)
-			if $i <> 1 then
-			   ConsoleWrite ('menu position not 1, change it'&@CRLF)
-			   MouseMove ($x, $y,1)
-			   MouseClick ('left', $x+10, $y)
-			   if SetFleetMenu()==0 then
-				  return 0
-			   EndIf
+	local $x
+	local $y
+	Local $search = _ImageSearchArea($btn_Fleet_menu_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 90 )
+	If $search = 1 Then
+		ConsoleWrite("fleet menu at "&$x&":"&$y&@CRLF)
+		local $i
+		for $i=0 To 2 step 1
+			ConsoleWrite ('check menu at position:'&$i&' must be in '&$btn_Fleet_menu[$i][0]&'<'&$x&'<'&$btn_Fleet_menu[$i][1]&@CRLF)
+			if ($x <= $btn_Fleet_menu[$i][1]) and ($x >= $btn_Fleet_menu[$i][0]) Then
+				ConsoleWrite ('menu position is '&$i&@CRLF)
+				if $i <> 1 then
+					ConsoleWrite ('menu position not 1, change it'&@CRLF)
+					MouseMove ($x, $y,1)
+					MouseClick ('left', $x+10, $y)
+					if SetFleetMenu()==0 then
+						return 0
+					EndIf
+				EndIf
 			EndIf
-		 EndIf
-	  Next
-   Else
-	  ConsoleWrite("can't find fleet menu"&@CRLF)
-	  VEGA_Calibrate()
-	  ;WinActivate ( "VEGA Conflict" )
-	  return -1
-   EndIf
+		Next
+	Else
+		ConsoleWrite("can't find fleet menu"&@CRLF)
+		VEGA_Calibrate()
+		;WinActivate ( "VEGA Conflict" )
+		return -1
+	EndIf
 EndFunc
 
 Func findReadyFleet() ;not used
-local $x
-local $y
-   Local $search = _ImageSearchArea('img\checkfleet.gif', 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 90 )
-   If $search = 1 Then
-      Beep();
-	  ;ConsoleWrite("fleet ready location: "&$x&":"&$y&@CRLF)
-      ;MouseMove($x, $y, 1)
-   Else
-	  ;ConsoleWrite("fleet ready location not found"&@CRLF)
-	  SetFleetMenu()
-   EndIf
+	local $x
+	local $y
+	Local $search = _ImageSearchArea('img\checkfleet.gif', 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 90 )
+	If $search = 1 Then
+		Beep();
+		;ConsoleWrite("fleet ready location: "&$x&":"&$y&@CRLF)
+		;MouseMove($x, $y, 1)
+	Else
+		;ConsoleWrite("fleet ready location not found"&@CRLF)
+		SetFleetMenu()
+	EndIf
 EndFunc
 
 Func VEGA_IfInBase () ; check main screen state not used
-   local $x
-   local $y
-   Local $search = _ImageSearchArea('img\InBase.gif', 0, 1, 1, 4096, 2048, $x, $y, 90 )
-   If $search = 1 Then
-      Beep();
-	  ConsoleWrite("In Base: "&$x&":"&$y&@CRLF)
-      MouseMove($x, $y, 1)
-   Else
-	  ConsoleWrite("Not in Base"&@CRLF)
-   EndIf
-
+	local $x
+	local $y
+	Local $search = _ImageSearchArea('img\InBase.gif', 0, 1, 1, 4096, 2048, $x, $y, 90 )
+	If $search = 1 Then
+		Beep();
+		ConsoleWrite("In Base: "&$x&":"&$y&@CRLF)
+		MouseMove($x, $y, 1)
+	Else
+		ConsoleWrite("Not in Base"&@CRLF)
+	EndIf
 EndFunc
 
 Func VEGA_IfInPlanet () ; check main screen state not used
-   local $x
-   local $y
-   Local $search = _ImageSearchArea('img\InPlanet.gif', 0, 1, 1, 4096, 2048, $x, $y, 90 )
-   If $search = 1 Then
-      Beep();
-	  ConsoleWrite("In Planet: "&$x&":"&$y&@CRLF)
-	  ;MouseMove($x, $y, 1)
-   Else
-	  ConsoleWrite("Not in Planet"&@CRLF)
-   EndIf
-
+	local $x
+	local $y
+	Local $search = _ImageSearchArea('img\InPlanet.gif', 0, 1, 1, 4096, 2048, $x, $y, 90 )
+	If $search = 1 Then
+		Beep();
+		ConsoleWrite("In Planet: "&$x&":"&$y&@CRLF)
+		;MouseMove($x, $y, 1)
+	Else
+		ConsoleWrite("Not in Planet"&@CRLF)
+	EndIf
 EndFunc
 
 Func VEGA_IfInSector () ; check main screen state not used
-   local $x
-   local $y
-   Local $search = _ImageSearchArea('img\InSector.gif', 0, 1, 1, 4096, 2048, $x, $y, 100 )
-   If $search = 1 Then
-      Beep();
-	  ConsoleWrite("In Sector: "&$x&":"&$y&@CRLF)
-      MouseMove($x, $y, 1)
-   Else
-	  ConsoleWrite("Not in Sector"&@CRLF)
-   EndIf
-
+	local $x
+	local $y
+	Local $search = _ImageSearchArea('img\InSector.gif', 0, 1, 1, 4096, 2048, $x, $y, 100 )
+	If $search = 1 Then
+		Beep();
+		ConsoleWrite("In Sector: "&$x&":"&$y&@CRLF)
+		MouseMove($x, $y, 1)
+	Else
+		ConsoleWrite("Not in Sector"&@CRLF)
+	EndIf
 EndFunc
 
 Func VEGA_IfWinActive()
-   ; return handle of VEGA window or 0 if no VEGA found
-   Local $hWnd = WinGetHandle("[ACTIVE]") ; handle of active window
-   ConsoleWrite('Win handle: '&$hWnd&@CRLF)
-   Local $hControl = ControlGetHandle($hWnd, "", "[CLASS:Unity.WebPlayer]") ;if any Unity.WebPlayer instance found in browser
-   ; add STEAM support
-   ConsoleWrite('control: '&$hControl&@CRLF)
+	; return handle of VEGA window or 0 if no VEGA found
+	Local $hWnd = WinGetHandle("[ACTIVE]") ; handle of active window
+	ConsoleWrite('Win handle: '&$hWnd&@CRLF)
+	Local $hControl = ControlGetHandle($hWnd, "", "[CLASS:Unity.WebPlayer]") ;if any Unity.WebPlayer instance found in browser
+	; add STEAM support
+	ConsoleWrite('control: '&$hControl&@CRLF)
 
-   if $hControl Then
-	  ConsoleWrite('Unity.WebPlayer present in active window'&@CRLF)
+	if $hControl Then
+		ConsoleWrite('Unity.WebPlayer present in active window'&@CRLF)
 
-	  local $tmp_VEGA_win_pos=WinGetPos($hControl )
-	  If not $tmp_VEGA_win_pos Then
-		 ;If $VEGA_win_pos[0]=$tmp_VEGA_win_pos[0] and $VEGA_win_pos[1]=$tmp_VEGA_win_pos[1] and $VEGA_win_pos[2]=$tmp_VEGA_win_pos[2] and $VEGA_win_pos[3]=$tmp_VEGA_win_pos[3] Then
+		local $tmp_VEGA_win_pos=WinGetPos($hControl )
+		If not $tmp_VEGA_win_pos Then
+		;If $VEGA_win_pos[0]=$tmp_VEGA_win_pos[0] and $VEGA_win_pos[1]=$tmp_VEGA_win_pos[1] and $VEGA_win_pos[2]=$tmp_VEGA_win_pos[2] and $VEGA_win_pos[3]=$tmp_VEGA_win_pos[3] Then
 		;	$VEGA_win[0]=$hWnd
 		;	$VEGA_win[1]=$hControl
 		;	Return $VEGA_win ; return handle of VEGA window without calibrating
 		; EndIf
-		 $VEGA_win_pos=$tmp_VEGA_win_pos
-		 ConsoleWrite("VEGA X:"&$VEGA_win_pos[0]&" Y:"&$VEGA_win_pos[1]&" width:"&$VEGA_win_pos[2]&" height:"&$VEGA_win_pos[3]&@CRLF)
+			$VEGA_win_pos=$tmp_VEGA_win_pos
+			ConsoleWrite("VEGA X:"&$VEGA_win_pos[0]&" Y:"&$VEGA_win_pos[1]&" width:"&$VEGA_win_pos[2]&" height:"&$VEGA_win_pos[3]&@CRLF)
 
-		 Global $btn_Fleet_menu[3][2]
+			Global $btn_Fleet_menu[3][2]
 
-		 $btn_Fleet_menu[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-280	; From right
-		 $btn_Fleet_menu[0][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-200
-		 $btn_Fleet_menu[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-130
-		 $btn_Fleet_menu[1][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-75
-		 $btn_Fleet_menu[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-50
-		 $btn_Fleet_menu[2][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]
-		 Global $btn_Fleet_menu_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-25	;From center
-		 Global $btn_Fleet_menu_y2=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+25
+			$btn_Fleet_menu[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-280	; From right
+			$btn_Fleet_menu[0][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-200
+			$btn_Fleet_menu[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-130
+			$btn_Fleet_menu[1][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-75
+			$btn_Fleet_menu[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-50
+			$btn_Fleet_menu[2][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]
+			Global $btn_Fleet_menu_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-25	;From center
+			Global $btn_Fleet_menu_y2=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+25
 
-local $btn_Fleet_Xstart=$VEGA_win_pos[0]+$VEGA_win_pos[2]-85
-local $btn_Fleet_Xend=$VEGA_win_pos[0]+$VEGA_win_pos[2]-40
-;local $btn_Fleet_Ystart=$VEGA_win_pos[1]+406
+			local $btn_Fleet_Xstart=$VEGA_win_pos[0]+$VEGA_win_pos[2]-85
+			local $btn_Fleet_Xend=$VEGA_win_pos[0]+$VEGA_win_pos[2]-40
+			;local $btn_Fleet_Ystart=$VEGA_win_pos[1]+406
 
-		 Global $btn_Fleet[7][4]
+			Global $btn_Fleet[7][4]
 
 ; Find where is -7 delta from center comes
 
-;Fleet 1
-$btn_Fleet[0][0]=$btn_Fleet_Xstart
-$btn_Fleet[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-150-7
-$btn_Fleet[0][2]=$btn_Fleet_Xend
-$btn_Fleet[0][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
+			;Fleet 1
+			$btn_Fleet[0][0]=$btn_Fleet_Xstart
+			$btn_Fleet[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-150-7
+			$btn_Fleet[0][2]=$btn_Fleet_Xend
+			$btn_Fleet[0][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
 
-;Fleet 2
-$btn_Fleet[1][0]=$btn_Fleet_Xstart
-$btn_Fleet[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
-$btn_Fleet[1][2]=$btn_Fleet_Xend
-$btn_Fleet[1][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
+			;Fleet 2
+			$btn_Fleet[1][0]=$btn_Fleet_Xstart
+			$btn_Fleet[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
+			$btn_Fleet[1][2]=$btn_Fleet_Xend
+			$btn_Fleet[1][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
 
-;Fleet 3
-$btn_Fleet[2][0]=$btn_Fleet_Xstart
-$btn_Fleet[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
-$btn_Fleet[2][2]=$btn_Fleet_Xend
-$btn_Fleet[2][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
+			;Fleet 3
+			$btn_Fleet[2][0]=$btn_Fleet_Xstart
+			$btn_Fleet[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
+			$btn_Fleet[2][2]=$btn_Fleet_Xend
+			$btn_Fleet[2][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
 
-;Fleet 4
-$btn_Fleet[3][0]=$btn_Fleet_Xstart
-$btn_Fleet[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
-$btn_Fleet[3][2]=$btn_Fleet_Xend
-$btn_Fleet[3][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
+			;Fleet 4
+			$btn_Fleet[3][0]=$btn_Fleet_Xstart
+			$btn_Fleet[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
+			$btn_Fleet[3][2]=$btn_Fleet_Xend
+			$btn_Fleet[3][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
 
-;Fleet 5
-$btn_Fleet[4][0]=$btn_Fleet_Xstart
-$btn_Fleet[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
-$btn_Fleet[4][2]=$btn_Fleet_Xend
-$btn_Fleet[4][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
+			;Fleet 5
+			$btn_Fleet[4][0]=$btn_Fleet_Xstart
+			$btn_Fleet[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
+			$btn_Fleet[4][2]=$btn_Fleet_Xend
+			$btn_Fleet[4][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
 
-;Fleet 6
-$btn_Fleet[5][0]=$btn_Fleet_Xstart
-$btn_Fleet[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
-$btn_Fleet[5][2]=$btn_Fleet_Xend
-$btn_Fleet[5][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
+			;Fleet 6
+			$btn_Fleet[5][0]=$btn_Fleet_Xstart
+			$btn_Fleet[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
+			$btn_Fleet[5][2]=$btn_Fleet_Xend
+			$btn_Fleet[5][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
 
-;Fleet 7
-$btn_Fleet[6][0]=$btn_Fleet_Xstart
-$btn_Fleet[6][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
-$btn_Fleet[6][2]=$btn_Fleet_Xend
-$btn_Fleet[6][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+150-7
-
-
-Global $btn_Tags_main[2]
-$btn_Tags_main[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-193 ;from right
-$btn_Tags_main[1]=$VEGA_win_pos[1]+35 ;from top
-
-;change from center ?
-Global $btn_Tags_page[3][2]
-$btn_Tags_page[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-427;230
-$btn_Tags_page[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285;130
-$btn_Tags_page[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-262
-$btn_Tags_page[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
-$btn_Tags_page[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-107
-$btn_Tags_page[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
-
-Global $btn_Tags_list[12][2]
-$btn_Tags_list[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-233
-$btn_Tags_list[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-179
-$btn_Tags_list[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-125
-$btn_Tags_list[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-71
-$btn_Tags_list[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-17
-$btn_Tags_list[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+37
-$btn_Tags_list[6][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[6][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+91
-$btn_Tags_list[7][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[7][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+145
-$btn_Tags_list[8][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[8][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+199
-$btn_Tags_list[9][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[9][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+253
-$btn_Tags_list[10][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[10][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+307
-$btn_Tags_list[11][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_Tags_list[11][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+361
-;~ $btn_Tags_list[12][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-;~ $btn_Tags_list[12][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+415
-
-; TODO - extend list to all targs
-
-local $btn_coords_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]-90
-local $btn_coords_y2=$VEGA_win_pos[1]+$VEGA_win_pos[3]
-
-Global $btn_coords[4][4] ;btn[number][x1,y1,x2,y2];
-$btn_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-192
-$btn_coords[0][1]=$btn_coords_y1
-$btn_coords[0][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-96
-$btn_coords[0][3]=$btn_coords_y2
-
-$btn_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-96
-$btn_coords[1][1]=$btn_coords_y1
-$btn_coords[1][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_coords[1][3]=$btn_coords_y2
-
-$btn_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_coords[2][1]=$btn_coords_y1
-$btn_coords[2][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+96
-$btn_coords[2][3]=$btn_coords_y2
-
-$btn_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+96
-$btn_coords[3][1]=$btn_coords_y1
-$btn_coords[3][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+192
-$btn_coords[3][3]=$btn_coords_y2
-
-Global $FleetManagerClosebtn_coords[2]
-$FleetManagerClosebtn_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+480
-$FleetManagerClosebtn_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-354
+			;Fleet 7
+			$btn_Fleet[6][0]=$btn_Fleet_Xstart
+			$btn_Fleet[6][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
+			$btn_Fleet[6][2]=$btn_Fleet_Xend
+			$btn_Fleet[6][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+150-7
 
 
-Global $RepairFleetBtn[2]
-$RepairFleetBtn[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+372
-$RepairFleetBtn[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+113
+			Global $btn_Tags_main[2]
+			$btn_Tags_main[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-193 ;from right
+			$btn_Tags_main[1]=$VEGA_win_pos[1]+35 ;from top
 
-Global $btn_repair_cost_coords[4]
-; KIXYEY site
-;btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-310
-;$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-90
-;$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+445
-;$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
+			;change from center ?
+			Global $btn_Tags_page[3][2]
+			$btn_Tags_page[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-427;230
+			$btn_Tags_page[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285;130
+			$btn_Tags_page[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-262
+			$btn_Tags_page[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
+			$btn_Tags_page[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-107
+			$btn_Tags_page[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
 
-; FACEBOOK site
-$btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+200
-$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-100
-$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+500
-$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
+			Global $btn_Tags_list[12][2]
+			$btn_Tags_list[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-233
+			$btn_Tags_list[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-179
+			$btn_Tags_list[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-125
+			$btn_Tags_list[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-71
+			$btn_Tags_list[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-17
+			$btn_Tags_list[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+37
+			$btn_Tags_list[6][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[6][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+91
+			$btn_Tags_list[7][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[7][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+145
+			$btn_Tags_list[8][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[8][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+199
+			$btn_Tags_list[9][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[9][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+253
+			$btn_Tags_list[10][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[10][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+307
+			$btn_Tags_list[11][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_Tags_list[11][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+361
+			;~ $btn_Tags_list[12][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			;~ $btn_Tags_list[12][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+415
+
+			; TODO - extend list to all targs
+
+			local $btn_coords_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]-90
+			local $btn_coords_y2=$VEGA_win_pos[1]+$VEGA_win_pos[3]
+
+			Global $btn_coords[4][4] ;btn[number][x1,y1,x2,y2];
+			$btn_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-192
+			$btn_coords[0][1]=$btn_coords_y1
+			$btn_coords[0][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-96
+			$btn_coords[0][3]=$btn_coords_y2
+
+			$btn_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-96
+			$btn_coords[1][1]=$btn_coords_y1
+			$btn_coords[1][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_coords[1][3]=$btn_coords_y2
+
+			$btn_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_coords[2][1]=$btn_coords_y1
+			$btn_coords[2][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+96
+			$btn_coords[2][3]=$btn_coords_y2
+
+			$btn_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+96
+			$btn_coords[3][1]=$btn_coords_y1
+			$btn_coords[3][2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+192
+			$btn_coords[3][3]=$btn_coords_y2
+
+			Global $FleetManagerClosebtn_coords[2]
+			$FleetManagerClosebtn_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+480
+			$FleetManagerClosebtn_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-354
 
 
-Global $ShipInFleet_coords[6][2]
-$ShipInFleet_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
-$ShipInFleet_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
+			Global $RepairFleetBtn[2]
+			$RepairFleetBtn[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+372
+			$RepairFleetBtn[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+113
 
-$ShipInFleet_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$ShipInFleet_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
+			Global $btn_repair_cost_coords[4]
+			; KIXYEY site
+			;btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-310
+			;$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-90
+			;$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+445
+			;$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
 
-$ShipInFleet_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+135
-$ShipInFleet_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
-
-$ShipInFleet_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
-$ShipInFleet_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
-
-$ShipInFleet_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-0
-$ShipInFleet_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
-
-$ShipInFleet_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
-$ShipInFleet_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
-
-Global $ShipInFleet_StatusRedGreenNumber_coords[6][2]
-$ShipInFleet_StatusRedGreenNumber_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
-$ShipInFleet_StatusRedGreenNumber_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
-$ShipInFleet_StatusRedGreenNumber_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
-$ShipInFleet_StatusRedGreenNumber_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
-$ShipInFleet_StatusRedGreenNumber_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
-$ShipInFleet_StatusRedGreenNumber_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
-$ShipInFleet_StatusRedGreenNumber_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
-$ShipInFleet_StatusRedGreenNumber_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
-
-$ShipInFleet_StatusRedGreenNumber_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
-$ShipInFleet_StatusRedGreenNumber_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
-
-$ShipInFleet_StatusRedGreenNumber_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
-$ShipInFleet_StatusRedGreenNumber_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
-
-Global $ShipInFleet_StatusLine_coords[6][3]
-$ShipInFleet_StatusLine_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-191
-$ShipInFleet_StatusLine_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
-
-$ShipInFleet_StatusLine_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-56
-$ShipInFleet_StatusLine_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
-
-$ShipInFleet_StatusLine_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
-$ShipInFleet_StatusLine_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
+			; FACEBOOK site
+			$btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+200
+			$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-100
+			$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+500
+			$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
 
 
-Global $LastShip_coords[2]
-$LastShip_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-433
-$LastShip_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-208
+			Global $ShipInFleet_coords[6][2]
+			$ShipInFleet_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
+			$ShipInFleet_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
 
-Global $LastShip_page[2]
-$LastShip_page[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-421
-$LastShip_page[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
+			$ShipInFleet_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$ShipInFleet_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
 
-Global $btn_notarget[2]
-$btn_notarget[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_notarget[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+90
+			$ShipInFleet_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+135
+			$ShipInFleet_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
 
-Global $btn_fleet_under_attack_ignore[2]
-$btn_fleet_under_attack_ignore[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+100
-$btn_fleet_under_attack_ignore[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+100
+			$ShipInFleet_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
+			$ShipInFleet_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
 
-Global $btn_reload_game[2]
-$btn_reload_game[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-$btn_reload_game[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+85 ; TODO - check Y location
+			$ShipInFleet_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-0
+			$ShipInFleet_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
 
-Global $btn_remove_from_fleet[4]
-$btn_remove_from_fleet[0]=925
-$btn_remove_from_fleet[1]=900
-$btn_remove_from_fleet[2]=1085
-$btn_remove_from_fleet[3]=925
-Global $btn_add_to_fleet[4]
-$btn_add_to_fleet[0]=940
-$btn_add_to_fleet[1]=900
-$btn_add_to_fleet[2]=1050
-$btn_add_to_fleet[3]=920
-Global $btn_launch_fleet[4]
-$btn_launch_fleet[0]=955
-$btn_launch_fleet[1]=905
-$btn_launch_fleet[2]=1060
-$btn_launch_fleet[3]=920
+			$ShipInFleet_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
+			$ShipInFleet_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
 
-	  Else
-		 ConsoleWrite('VEGA window size is unknown'&@CRLF)
-	  EndIf
-	  Return $VEGA_win ; return handle of VEGA window
-   Else
-	  ConsoleWrite('No Unity.WebPlayer in active window'&@CRLF)
-	  ;add here STEAM support
-	  Return 0 ; return 0 if no VEGA found
-   EndIf
+			Global $ShipInFleet_StatusRedGreenNumber_coords[6][2]
+			$ShipInFleet_StatusRedGreenNumber_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
+			$ShipInFleet_StatusRedGreenNumber_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
+
+			$ShipInFleet_StatusRedGreenNumber_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
+			$ShipInFleet_StatusRedGreenNumber_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
+
+			$ShipInFleet_StatusRedGreenNumber_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
+			$ShipInFleet_StatusRedGreenNumber_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
+
+			$ShipInFleet_StatusRedGreenNumber_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
+			$ShipInFleet_StatusRedGreenNumber_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
+
+			$ShipInFleet_StatusRedGreenNumber_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
+			$ShipInFleet_StatusRedGreenNumber_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
+
+			$ShipInFleet_StatusRedGreenNumber_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
+			$ShipInFleet_StatusRedGreenNumber_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
+
+			Global $ShipInFleet_StatusLine_coords[6][3]
+			$ShipInFleet_StatusLine_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-191
+			$ShipInFleet_StatusLine_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
+
+			$ShipInFleet_StatusLine_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-56
+			$ShipInFleet_StatusLine_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
+
+			$ShipInFleet_StatusLine_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
+			$ShipInFleet_StatusLine_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
+
+
+			Global $LastShip_coords[2]
+			$LastShip_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-433
+			$LastShip_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-208
+
+			Global $LastShip_page[2]
+			$LastShip_page[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-421
+			$LastShip_page[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-285
+
+			Global $btn_notarget[2]
+			$btn_notarget[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_notarget[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+90
+
+			Global $btn_fleet_under_attack_ignore[2]
+			$btn_fleet_under_attack_ignore[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+100
+			$btn_fleet_under_attack_ignore[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+100
+
+			Global $btn_reload_game[2]
+			$btn_reload_game[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
+			$btn_reload_game[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+85 ; TODO - check Y location
+
+			Global $btn_remove_from_fleet[4]
+			$btn_remove_from_fleet[0]=925
+			$btn_remove_from_fleet[1]=900
+			$btn_remove_from_fleet[2]=1085
+			$btn_remove_from_fleet[3]=925
+			Global $btn_add_to_fleet[4]
+			$btn_add_to_fleet[0]=940
+			$btn_add_to_fleet[1]=900
+			$btn_add_to_fleet[2]=1050
+			$btn_add_to_fleet[3]=920
+			Global $btn_launch_fleet[4]
+			$btn_launch_fleet[0]=955
+			$btn_launch_fleet[1]=905
+			$btn_launch_fleet[2]=1060
+			$btn_launch_fleet[3]=920
+
+		Else
+			ConsoleWrite('VEGA window size is unknown'&@CRLF)
+		EndIf
+		Return $VEGA_win ; return handle of VEGA window
+	Else
+		ConsoleWrite('No Unity.WebPlayer in active window'&@CRLF)
+		;add here STEAM support
+		Return 0 ; return 0 if no VEGA found
+	EndIf
 EndFunc
 
 Func VEGA_Calibrate() ;not used - use for relative coords
-   while 1
-	  if @DesktopWidth<>1920 or @DesktopHeight<>1080 Then
-		 ;ConsoleWrite('Desktop should be 1920x1080 but current settings is: '&@DesktopWidth&':'&@DesktopHeight&@CRLF)
-	  EndIf
+	while 1
+		if @DesktopWidth<>1920 or @DesktopHeight<>1080 Then
+			;ConsoleWrite('Desktop should be 1920x1080 but current settings is: '&@DesktopWidth&':'&@DesktopHeight&@CRLF)
+		EndIf
 
+		local $hControl=VEGA_IfWinActive()
 
-	  local $hControl=VEGA_IfWinActive()
+		if $hControl = 0 Then
+			ConsoleWrite('VEGA window is not ACTIVE!'&@CRLF&'handle'&@CRLF)
+			if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
+				ConsoleWrite('Ok set control focus - something strange')
+				Sleep (2000)
+			else
+				ConsoleWrite('ERROR setting focus to control')
+				Sleep (5000)
+			EndIf
+		Else	;found VEGA Unity WebPlayer
+			ConsoleWrite('VEGA window is ACTIVE!'&@CRLF&'handle'&@CRLF)
+			if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
+				ConsoleWrite('Ok set control focus'&@CRLF)
+				;$VEGA_win_pos=ControlGetPos($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]");
 
-	  if $hControl = 0 Then
-		 ConsoleWrite('VEGA window is not ACTIVE!'&@CRLF&'handle'&@CRLF)
-		 if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
-			ConsoleWrite('Ok set control focus - something strange')
-			Sleep (2000)
-		 else
-			ConsoleWrite('ERROR setting focus to control')
-			Sleep (5000)
-		 EndIf
-		 Else	;found VEGA Unity WebPlayer
-		 ConsoleWrite('VEGA window is ACTIVE!'&@CRLF&'handle'&@CRLF)
- 		 if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
-			ConsoleWrite('Ok set control focus'&@CRLF)
-			;$VEGA_win_pos=ControlGetPos($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]");
+				Sleep (2000)
+				return 0
+			else
+				ConsoleWrite('ERROR setting focus to control'&@CRLF)
+				Sleep (5000)
+			EndIf
+		EndIf
+	WEnd
 
-			Sleep (2000)
-			return 0
-		 else
-			ConsoleWrite('ERROR setting focus to control'&@CRLF)
-			Sleep (5000)
-		 EndIf
-	  EndIf
-   WEnd
+	; code up to EndFunc should be removed
 
-   ; code up to EndFunc should be removed
-
-   local $x
-   local $y
-   Local $search = _ImageSearchArea('img\BuildIcon.bmp', 0, 1, 1, 4096, 2048, $x, $y, 100 )
-   If $search = 1 Then
-      Beep();
-	  ConsoleWrite("build location: "&$x&":"&$y&@CRLF)
-      MouseMove($x, $y, 1)
-   Else
-	  ConsoleWrite("build location not found"&@CRLF)
-   EndIf
+	local $x
+	local $y
+	Local $search = _ImageSearchArea('img\BuildIcon.bmp', 0, 1, 1, 4096, 2048, $x, $y, 100 )
+	If $search = 1 Then
+		Beep();
+		ConsoleWrite("build location: "&$x&":"&$y&@CRLF)
+		MouseMove($x, $y, 1)
+	Else
+		ConsoleWrite("build location not found"&@CRLF)
+	EndIf
 
    ;VEGA_IfInBase ()
    ;VEGA_IfInPlanet ()
    ;VEGA_IfInSector ()
    ;VEGA_clickBase ()
-
 EndFunc
 
 Func VEGA_exit ()
- Exit
+	Exit
 EndFunc
 
 Func VEGA_clickBase () ; not used
-   ;MouseClick ( "left" , $VEGA_win_pos[0]+$VEGA_win_pos[2]-151, $VEGA_win_pos[1]+$VEGA_win_pos[3]-82 , 1 , 1 )
+	; MouseClick ( "left" , $VEGA_win_pos[0]+$VEGA_win_pos[2]-151, $VEGA_win_pos[1]+$VEGA_win_pos[3]-82 , 1 , 1 )
 EndFunc
 
 Func VEGA_CheckFleet( $FleetNumber=0) ;return fleet status
    local $fleetstatus = 0
-   ; 0 = empty fleet
-   ; 1 = in port ok
-   ; 2 = in port damaged
-   ; 3 = idle ok
-   ; 4 = idle damaged
-   ; 5 = moving ok
-   ; 6 = moving damaged
-   ; 7 = in action/battle
-if $FleetNumber<0 or $FleetNumber>6 Then
-	return -1
-EndIf
+	; 0 = empty fleet
+	; 1 = in port ok
+	; 2 = in port damaged
+	; 3 = idle ok
+	; 4 = idle damaged
+	; 5 = moving ok
+	; 6 = moving damaged
+	; 7 = in action/battle
+	if $FleetNumber<0 or $FleetNumber>6 Then
+		return -1
+	EndIf
 
-;local $x
-;Localocal $y
-local $i
-local $j
-;for $i=0 to 3 step 1 ;fleets 0-3
-   $i=$FleetNumber
-   for $j=0 to 7 ; look for fleet status
-	  ;consolewrite("i: "&$i&" j: "&$j&" "&'-'&" "&@CRLF)
-	  ;MouseMove($btn_Fleet[$i][0], $btn_Fleet[$i][1], 1)
-	  ;MouseMove($btn_Fleet[$i][2], $btn_Fleet[$i][3], 1)
-	  ;Sleep (2000)
-	  Local $search = _ImageSearchArea( $btn_Fleet_img[$j], 0, $btn_Fleet[$i][0], $btn_Fleet[$i][1], $btn_Fleet[$i][2], $btn_Fleet[$i][3], $x, $y, 90 )
+	local $i
+	local $j
+	$i=$FleetNumber
+	for $j=0 to 7 ; look for fleet status
+		Local $search = _ImageSearchArea( $btn_Fleet_img[$j], 0, $btn_Fleet[$i][0], $btn_Fleet[$i][1], $btn_Fleet[$i][2], $btn_Fleet[$i][3], $x, $y, 90 )
 
-	  If $search = 1 Then
-		 ;MouseMove($x, $y, 1)
-		 ;MouseClick ('left', $x, $y)
-		 ;send($i+1)
-		 ;ConsoleWrite("Fleet: "&$i&" status: "&$j&@CRLF)	;" btn_coords: "&$x&":"&$y&@CRLF)
-		 $fleetstatus=$j
-		 Return $fleetstatus
-	  else
-		 ;ConsoleWrite("Fleet: "&$i&" status: "&$j&" not found at coords: "&$btn_Fleet[$i][0]&":"&$btn_Fleet[$i][1]&":"&$btn_Fleet[$i][2]&":"&$btn_Fleet[$i][3]&@CRLF)
-	  EndIf
-   Next
-
-;Next
-   SetFleetMenu()
-   Return -1	;status not found
+		If $search = 1 Then
+			$fleetstatus=$j
+			Return $fleetstatus
+		else
+			;ConsoleWrite("Fleet: "&$i&" status: "&$j&" not found at coords: "&$btn_Fleet[$i][0]&":"&$btn_Fleet[$i][1]&":"&$btn_Fleet[$i][2]&":"&$btn_Fleet[$i][3]&@CRLF)
+		EndIf
+	Next
+	SetFleetMenu()
+	Return -1	;status not found
 EndFunc
 
 Func VEGA_RepairIsFree()
+	MouseMove($btn_repair_cost_coords[0]+($btn_repair_cost_coords[2]-$btn_repair_cost_coords[0])/2, $btn_repair_cost_coords[1]+($btn_repair_cost_coords[3]-$btn_repair_cost_coords[1])/2,1)
+	sleep (200)
+	local $x=0
+	local $y=0
 
-   MouseMove($btn_repair_cost_coords[0]+($btn_repair_cost_coords[2]-$btn_repair_cost_coords[0])/2, $btn_repair_cost_coords[1]+($btn_repair_cost_coords[3]-$btn_repair_cost_coords[1])/2,1)
-;~    MouseMove ($btn_repair_cost_coords[0], $btn_repair_cost_coords[1],20)
-;~    sleep(2000)
-;~    MouseMove ($btn_repair_cost_coords[2], $btn_repair_cost_coords[3],20)
-   sleep (200)
-   ;MouseMove($btn_repair_cost_coords[0], $btn_repair_cost_coords[1],20)
-   ;MouseMove($btn_repair_cost_coords[2], $btn_repair_cost_coords[1],20)
-   ;MouseMove($btn_repair_cost_coords[2], $btn_repair_cost_coords[3],20)
-   ;MouseMove($btn_repair_cost_coords[0], $btn_repair_cost_coords[3],20)
-   local $x=0
-   local $y=0
-
-   ;Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 90 )
-   ;Works w/Kixeye
-   ;Local $search = _ImageSearchArea( $btn_repair_image, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
-   ; Facebook
-   Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 70 )
-
-   ;TEMP !!!
-   ;$search=0
-   if $search = 1 Then
-	  ConsoleWrite ('found repair is free '&$x&':'&$y&@CRLF)
-	  ;MouseMove($btn_repair_cost_coords[0]+($btn_repair_cost_coords[2]-$btn_repair_cost_coords[0])/2, $btn_repair_cost_coords[1]+($btn_repair_cost_coords[3]-$btn_repair_cost_coords[1])/2,1)
-	  ;MouseMove($x,$y,50)
-	  ;sleep (250)
-	  ;MouseClick('left',$btn_repair_cost_coords[0]+($btn_repair_cost_coords[2]-$btn_repair_cost_coords[0])/2, $btn_repair_cost_coords[1]+($btn_repair_cost_coords[3]-$btn_repair_cost_coords[1])/2,1)
-	  ;MouseClick($x,$y,1,50)
-	  ;sleep(500)
-	  ConsoleWrite('img found at X:'&$x&' Y:'&$y&@CRLF)
-
-	  MouseClick('left',$x,$y,2,1)
-	  ConsoleWrite('CLICKED'&@CRLF)
-	  sleep(200)
-	  ;click 'repair'
-	  return True
-   else
-	  ConsoleWrite ($search&@CRLF)
-
-	  ConsoleWrite ('repair is free not found '&$btn_repair_cost_coords[0]&"x"&$btn_repair_cost_coords[1]&" "&$btn_repair_cost_coords[2]&"x"&$btn_repair_cost_coords[3]&@CRLF)
-;~   	  MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[1],50)
-;~ 	  MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[1],40)
-;~ 	  MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[3],40)
-;~ 	  MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[3],40)
-
-	  return False
-   EndIf
-
-	  ;sleep (10000)
-   return False
+	;Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 90 )
+	;Works w/Kixeye
+	;Local $search = _ImageSearchArea( $btn_repair_image, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
+	; Facebook
+	Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 70 )
+	if $search = 1 Then
+		ConsoleWrite ('found repair is free '&$x&':'&$y&@CRLF)
+		ConsoleWrite('img found at X:'&$x&' Y:'&$y&@CRLF)
+		MouseClick('left',$x,$y,2,1)
+		ConsoleWrite('CLICKED'&@CRLF)
+		sleep(200)
+		return True
+	else
+		ConsoleWrite ($search&@CRLF)
+		ConsoleWrite ('repair is free not found '&$btn_repair_cost_coords[0]&"x"&$btn_repair_cost_coords[1]&" "&$btn_repair_cost_coords[2]&"x"&$btn_repair_cost_coords[3]&@CRLF)
+;~   	 MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[1],50)
+;~ 	  	MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[1],40)
+;~ 	  	MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[3],40)
+;~ 	  	MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[3],40)
+		return False
+	EndIf
+	;sleep (10000)
+	return False
 EndFunc
 
 Func Vega_RemoveShip($ship_numb)
@@ -761,27 +718,20 @@ Func Vega_RemoveShip($ship_numb)
 EndFunc
 
 Func Vega_AddShip($ship_numb)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-   sleep(200)
-   MouseMove($ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],5)
-   sleep(100)
-   MouseClick('left',$ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1,5)
-   sleep(500)
-   ;MouseClick('left',543+$VEGA_win_pos[0],273+$VEGA_win_pos[1],1,1)
-   ;sleep (300)
-   ;MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,1)
-   ;sleep(300)
-   sleep(200)
-   MouseMove($LastShip_page[0],$LastShip_page[1],1)
-   sleep(100)
-   MouseClick('left',$LastShip_page[0],$LastShip_page[1],1,1)
-   sleep(300)
-   MouseMove($LastShip_coords[0],$LastShip_coords[1],1)
-   sleep(100)
-   MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,5)
-   sleep(500)
+	sleep(200)
+	MouseMove($ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],5)
+	sleep(100)
+	MouseClick('left',$ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1,5)
+	sleep(500)
+	sleep(200)
+	MouseMove($LastShip_page[0],$LastShip_page[1],1)
+	sleep(100)
+	MouseClick('left',$LastShip_page[0],$LastShip_page[1],1,1)
+	sleep(300)
+	MouseMove($LastShip_coords[0],$LastShip_coords[1],1)
+	sleep(100)
+	MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,5)
+	sleep(500)
 
 	local $x=0
 	local $y=0
@@ -798,9 +748,9 @@ Func Vega_AddShip($ship_numb)
 
 ;~    sleep(50)
 ;~    MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,5)
-   ;sleep(10)
-   ;MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,1)
-   sleep(300)
+	;sleep(10)
+	;MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,1)
+	sleep(300)
 EndFunc
 
 Func VEGA_RepairFleet3($FleetNumber=0) ;repairing fleet in FLEET MANGER
@@ -827,27 +777,22 @@ Func VEGA_RepairFleet3($FleetNumber=0) ;repairing fleet in FLEET MANGER
 			Else
 				ConsoleWrite("Ship["&$i & "] - GREEN " & @CRLF)
 			EndIf
-
 		Next
 
-		For $i=0 to 5
-;~ 		MouseMove($ShipInFleet_StatusRedGreenNumber_coords[$i][0],$ShipInFleet_StatusRedGreenNumber_coords[$i][1])
-;~ 		Sleep(1000)
-		$fleet_demaged = PixelSearch($ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1], $ShipInFleet_StatusRedGreenNumber_coords[$i][0]+2, $ShipInFleet_StatusRedGreenNumber_coords[$i][1]-2, 0x73393A,25) ;только красненькие 0x713838
-		sleep(200)
-		If IsArray($fleet_demaged) > 0 Then
-			ConsoleWrite($i & " RED " & @CRLF)
-		Else
-			ConsoleWrite($i & " GREEN " & @CRLF)
-		EndIf
-	Next
-
+;~ 		For $i=0 to 5
+;~ 		$fleet_demaged = PixelSearch($ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1], $ShipInFleet_StatusRedGreenNumber_coords[$i][0]+2, $ShipInFleet_StatusRedGreenNumber_coords[$i][1]-2, 0x73393A,25) ;только красненькие 0x713838
+;~ 		sleep(200)
+;~ 		If IsArray($fleet_demaged) > 0 Then
+;~ 			ConsoleWrite($i & " RED " & @CRLF)
+;~ 		Else
+;~ 			ConsoleWrite($i & " GREEN " & @CRLF)
+;~ 		EndIf
+;~ 		Next
 
 		; собираем флот обратно
 		If IsArray($arrRepairFleet) Then
 			local $arrayLenght = UBound($arrRepairFleet)
 			_ArrayReverse($arrRepairFleet)
-;~ 			ConsoleWrite("NEW $arrayLenght ="& $arrayLenght&@CRLF )
 			For $k=0 To $arrayLenght-1
 ;~ 				ConsoleWrite($arrRepairFleet[$k] & @LF)
 				Vega_AddShip($arrRepairFleet[$k])
@@ -942,48 +887,47 @@ Func VEGA_RepairFleet2($FleetNumber=0) ;repairing fleet in FLEET MANGER
 EndFunc
 
 Func VEGA_FleetManagerClose()
-   sleep (200)
-   MouseClick("left", $FleetManagerClosebtn_coords[0],$FleetManagerClosebtn_coords[1],1,1)
-   sleep(300)
+	sleep (200)
+	MouseClick("left", $FleetManagerClosebtn_coords[0],$FleetManagerClosebtn_coords[1],1,1)
+	sleep(300)
 EndFunc
 
 func VEGA_IfManageBtn($action='' , $fleet=0)
-   ;MouseMove($btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,1)
-   sleep(300)
-   send($fleet+1)
-   ;mouseclick('left',$btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,50)
-   ;send ("q")
-   sleep(300)
+	;MouseMove($btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,1)
+	sleep(300)
+	send($fleet+1)
+	;mouseclick('left',$btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,50)
+	;send ("q")
+	sleep(300)
 
-   local $x
-   local $y
-   ;MouseMove($btn_coords[0][0], $btn_coords[0][1], 10)
-   ;MouseMove($btn_coords[0][2], $btn_coords[0][3], 10)
-   ;MouseMove($btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1)
-   ;ConsoleWrite('looking for:'&$btn_Fleet_manage_img&' in '&$btn_coords[0][0]&' '& $btn_coords[0][1]&' '&$btn_coords[0][2]&' '&$btn_coords[0][3])
-   sleep(300)
-   Local $search = _ImageSearchArea($btn_Fleet_manage_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 90 )
-if $search = 1 Then
-      ;Beep();
-	  ConsoleWrite("fleet ready for manage, button:"&$x&":"&$y&@CRLF)
-      ;MouseMove($x, $y, 100)
-	  local $retarr[2]
-	  $retarr[0]=$x
-	  $retarr[1]=$y
-	  if $action == 'click' Then
-		 ;MouseMove ( $btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,20)
-		 ;MouseClick ('left', $btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1,1)
+	local $x
+	local $y
+	;MouseMove($btn_coords[0][0], $btn_coords[0][1], 10)
+	;MouseMove($btn_coords[0][2], $btn_coords[0][3], 10)
+	;MouseMove($btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1)
+	;ConsoleWrite('looking for:'&$btn_Fleet_manage_img&' in '&$btn_coords[0][0]&' '& $btn_coords[0][1]&' '&$btn_coords[0][2]&' '&$btn_coords[0][3])
+	sleep(300)
+	Local $search = _ImageSearchArea($btn_Fleet_manage_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 90 )
+	if $search = 1 Then
+		;Beep();
+		ConsoleWrite("fleet ready for manage, button:"&$x&":"&$y&@CRLF)
+		;MouseMove($x, $y, 100)
+		local $retarr[2]
+		$retarr[0]=$x
+		$retarr[1]=$y
+		if $action == 'click' Then
+			;MouseMove ( $btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,20)
+			;MouseClick ('left', $btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1,1)
 
-		 send("q")
-		 sleep (500)
-	  EndIf
-	  return $retarr
+			send("q")
+			sleep (500)
+		EndIf
+		return $retarr
+	Else
+		ConsoleWrite("fleet not ready for manage"&@CRLF)
 
-   Else
-	  ConsoleWrite("fleet not ready for manage"&@CRLF)
-
-   EndIf
-   return -1
+	EndIf
+	return -1
 EndFunc
 
 
@@ -1005,7 +949,7 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 		sleep($Debug_sleep)
 		local $try=0
 		; click on target main button
-		;ConsoleWrite('TAGs main x:y is 1e1e1e1e1e1e1e1e'&$btn_Tags_main[0]&':'&$btn_Tags_main[1]&@CRLF)
+		;ConsoleWrite('TAGs main x:y is '&$btn_Tags_main[0]&':'&$btn_Tags_main[1]&@CRLF)
 		; кликаем на кнопку BOOKMARKS
 		MouseClick('left',$btn_Tags_main[0],$btn_Tags_main[1],1,1)
 ;~ 		MouseMove($btn_Tags_main[0],$btn_Tags_main[1])
@@ -1130,23 +1074,23 @@ func VEGA_attack_target($fleet, $target=-1)
 EndFunc
 
 Func VEGA_ReturnFleet($Fleet=0)
-   sleep(100)
-   ConsoleWrite(' return fleet sub for fleet '&$Fleet+1&@CRLF)
-   Local $search = _ImageSearchArea($btn_Fleet_manage_img, 0, $btn_coords[2][0], $btn_coords[2][1], $btn_coords[2][2], $btn_coords[2][3], $x, $y, 90 )
-   if $search = 1 Then
-	  ConsoleWrite(' return btn found for fleet '&$Fleet+1&@CRLF)
-	  Send("e")
-   Else
-	  ConsoleWrite(' return btn not found for fleet '&$Fleet+1&@CRLF)
-	  Send($Fleet+1)
-	  sleep(50)
-	  Send("e")
-   EndIf
-   sleep(100)
+	sleep(100)
+	ConsoleWrite(' return fleet sub for fleet '&$Fleet+1&@CRLF)
+	Local $search = _ImageSearchArea($btn_Fleet_manage_img, 0, $btn_coords[2][0], $btn_coords[2][1], $btn_coords[2][2], $btn_coords[2][3], $x, $y, 90 )
+	if $search = 1 Then
+		ConsoleWrite(' return btn found for fleet '&$Fleet+1&@CRLF)
+		Send("e")
+	Else
+		ConsoleWrite(' return btn not found for fleet '&$Fleet+1&@CRLF)
+		Send($Fleet+1)
+		sleep(50)
+		Send("e")
+	EndIf
+	sleep(100)
 EndFunc
 
 Func Quit()
 ;~    MsgBox(0,"","Exit key. Bot ends with "& $i &" itterations",5)
-   ConsoleWrite("Exit using key F6"&@CRLF)
-   Exit
+	ConsoleWrite("Exit using key F6"&@CRLF)
+	Exit
 EndFunc
