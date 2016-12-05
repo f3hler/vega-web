@@ -5,15 +5,10 @@
 ;~ Global $title_main = "KIXEYE.com - Mozilla Firefox"
 ;~ Global $title_main = "KIXEYE - VEGA Conflict - Mozilla Firefox"
 Global $title_main = "[REGEXPTITLE:KIXEYE.*]"
-;~ Global $title_main = "10.141.2.154 - Remote Desktop Connection"
 Global $Debug_sleep=1000
 Global $actionOnlyRepair=0		; !только ремонт!
 Global $actionReturnFleets=0
 Global $btn_Fleet[7][4]
-Global $fleetActive_b=0 ; кол-во флотов для фарма. начльная цыфра+1 		!!!!!!!!!!!!!!!!!!!
-Global $fleetActive_e=4 ; кол-во флотов для фарма. конечная цыфра+1 		!!!!!!!!!!!!!!!!!11
-Global $btn_Tags_max=3	;кол-во флотов для поиска из закладок
-Global $btn_Tags_min=0
 
 ;------------------
 ; активные флоты
@@ -56,10 +51,6 @@ $cap_left_game_img='img\cap_left_deck.gif'
 Global $btn_reload_game[2]
 Global $lost_connection_img='img\lost_connection.gif'
 Global $btn_reload_game[2]
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;$VEGA_win_pos[0]=1024
-;$VEGA_win_pos[1]=768
-;$VEGA_win_pos[3]=768
 Global $wait_attack_max_time=8000 ; in milliseconds3e
 Global $btn_fleet_under_attack='img\fleet\fleet_under_attack.gif'
 Global $btn_fleet_under_attack_ignore[2]
