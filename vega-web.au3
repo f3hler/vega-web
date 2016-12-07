@@ -8,6 +8,10 @@ Global $title_main = "[REGEXPTITLE:KIXEYE.*]"
 Global $Debug_sleep=1000
 Global $actionOnlyRepair=0		; !только ремонт!
 Global $actionReturnFleets=0
+Global $wait_attack_max_time=8000 ; in milliseconds3e
+HotKeySet("p", "findReadyFleet")
+HotKeySet("x", "VEGA_exit")
+HotKeySet("{F6}","Quit")
 Global $btn_Fleet[7][4]
 
 ;------------------
@@ -25,7 +29,7 @@ EndIf
 ;-----------------
 ; активные цели
 ;-----------------
-Local $targets_data = "3,4"
+Local $targets_data = "1,3,4,5"
 Global $targets_Array=StringSplit($targets_data, ",")
 Global $arrayTargetsLenght = UBound($targets_Array)
 If IsArray($targets_Array) Then
@@ -37,11 +41,6 @@ If IsArray($targets_Array) Then
 	Next
 EndIf
 
-;#AutoIt3Wrapper_Run_Debug_Mode = Y
-;#AutoIt3Wrapper_Run_Debug = On
-HotKeySet("p", "findReadyFleet")
-HotKeySet("x", "VEGA_exit")
-HotKeySet("{F6}","Quit")
 Global $VEGA_win[2]	;VEGA winhandle and control if any
 Global $VEGA_win_pos[4];=WinGetPos  ( "VEGA 55Conflict" )
 Global $cap_left_game_img
@@ -49,7 +48,6 @@ $cap_left_game_img='img\cap_left_deck.gif'
 Global $btn_reload_game[2]
 Global $lost_connection_img='img\lost_connection.gif'
 Global $btn_reload_game[2]
-Global $wait_attack_max_time=8000 ; in milliseconds3e
 Global $btn_fleet_under_attack='img\fleet\fleet_under_attack.gif'
 Global $btn_fleet_under_attack_ignore[2]
 Global $btn_Fleet_img[9]
@@ -75,8 +73,6 @@ $btn_Fleet_img[8]='img\fleet\fleet_inport_repairing.gif'
 Global $btn_Fleet_manage_img='img\fleet_manage.gif'
 Global $btn_Fleet_menu_img='img\fleet_menu.gif' ;fleet menu img
 Global $btn_Fleet_menu[3][2] ;x/y position of 3 states menu
-;Global $btn_Fleet_menu_y1=536
-;Global $btn_Fleet_menu_y2=582
 Global $btn_Attack_active_img='img\attack_active.gif'
 Global $btn_Fleet_warp_img='img\fleet_warp_img.gif'
 
@@ -90,11 +86,8 @@ local $btn_coords_y2=1052
 global $y = 0, $x = 0
 ;FB
 Global $btn_repair_image='img\fleet_instant_repair_fb_selected.gif';
-;~ Global $btn_repair_image='fleet_instant_repair_fb_not_selected'
 Global $btn_repair_fleet_img='img\fleet_repair_btn.png'
-;~ Global $btn_repair_instant_planet_img='fleet_instant_repair_planet.png'
 Global $btn_repair_instant_planet_img='img\fleet_instant_free_planet_01.png'
-
 
 Global $img_btn_remove_from_fleet='img\remove_from_fleet.bmp'
 Global $img_btn_add_to_fleet='img\add_to_fleet.bmp'
@@ -111,9 +104,158 @@ Global $img_btn_launch_fleet='img\launch_fleet.bmp'
 Vega_Active()
 VEGA_Calibrate()
 VEGA_Main()
-;~ test()
+;~ test4()
 
-Func test()
+Func test4()
+	Local $delta_StatusLineX_coords[7] = [107,53,26,13,6,3,1]
+	Local $ShipInFleet_StatusLineY_coords[2] = [$ShipInFleet_StatusLine_coords[0][1], $ShipInFleet_StatusLine_coords[3][1]]
+	local $damageResult[7]
+	Sleep(200)
+	For $i=0 to 5
+		local $k=1
+		local $coordX= $ShipInFleet_StatusLine_coords[$i][0]
+		local $coordY= $ShipInFleet_StatusLine_coords[$i][1]
+;~ 		For $n=1 to 5
+;~ 			$coordX += $delta_StatusLineX_coords[$n]*$k
+			local $fleet_demaged = PixelSearch($coordX, $coordY, $coordX+107, $coordY+1, 0x5095A5,25)
+			sleep(200)
+			If IsArray($fleet_demaged) > 0 Then
+				ConsoleWrite('$fleet_demaged ['&$i&'] '&$fleet_demaged[0]&' '&$fleet_demaged[1] &' $fleet_demaged '&UBound($fleet_demaged)&' '&UBound($fleet_demaged[0])& @CRLF)
+				MouseMove($fleet_demaged[0], $fleet_demaged[1])
+;~ 				for $i = 0 to UBound($fleet_demaged[])-1
+			Else
+				ConsoleWrite('$fleet_demaged ['&$i&'] '& @CRLF)
+				MouseMove($coordX, $coordY)
+			EndIf
+;~ 		Next
+
+	Next
+
+EndFunc
+
+;~ #include <MsgBoxConstants.au3>
+
+;~ Local $hTimer = TimerInit() ; Begin the timer and store the handle in a variable.
+;~ Sleep(3000) ; Sleep for 3 seconds.
+;~ Local $fDiff = TimerDiff($hTimer) ; Find the difference in time from the previous call of TimerInit. The variable we stored the TimerInit handlem is passed as the "handle" to TimerDiff.
+;~ MsgBox($MB_SYSTEMMODAL, "Time Difference", $fDiff)
+
+
+Func test3()
+	Local $delta_StatusLineX_coords[7] = [107,53,26,13,6,3,1]
+	Local $ShipInFleet_StatusLineY_coords[2] = [$ShipInFleet_StatusLine_coords[0][1], $ShipInFleet_StatusLine_coords[3][1]]
+	local $damageResult[7]
+	Sleep(200)
+	For $i=0 to 5
+		local $k=1
+		local $coordX= $ShipInFleet_StatusLine_coords[$i][0]
+		local $coordY= $ShipInFleet_StatusLine_coords[$i][1]
+		For $n=1 to 5
+			$coordX += $delta_StatusLineX_coords[$n]*$k
+			local $fleet_demaged = PixelSearch($coordX, $coordY, $coordX, $coordY+1, 0x5095A5,25)
+			sleep(200)
+			If IsArray($fleet_demaged) > 0 Then
+				$k=1
+			Else
+				$k=-1
+			EndIf
+		Next
+		$coordX += $delta_StatusLineX_coords[6]*$k
+
+		$damageResult[$i]=$coordX - $ShipInFleet_StatusLine_coords[$i][0]
+		if ($damageResult[$i]) > 101 Then
+			for $n=$damageResult[$i]+1 to 107 Step 1
+				ConsoleWrite('i['&$i&']   PixelGetColor  ['&$n&'] '&Hex(PixelGetColor($coordX, $coordY))& @CRLF)
+				local $fleet_demaged = PixelSearch($coordX, $coordY, $coordX, $coordY, 0x5095A5,25)
+				sleep(100)
+				If IsArray($fleet_demaged) > 0 Then
+					$damageResult[$i]+=1
+				Else
+					ExitLoop
+				EndIf
+			Next
+		EndIf
+		MouseMove($coordX, $coordY)
+	Next
+	for $n=0 to 5
+		ConsoleWrite('damage = '& $damageResult[$n]& @CRLF)
+	Next
+	$min=107
+	$minNum=0
+	for $n=0 to 5
+		if $damageResult[$n]<$min Then
+			$min = $damageResult[$n]
+			$minNum = $n
+		EndIf
+	Next
+	ConsoleWrite('$min='&$damageResult[$minNum]& @CRLF)
+
+EndFunc
+
+Func test2()
+	Local $delta_StatusLineX_coords[7] = [107,53,26,13,6,3,1]
+	Local $ShipInFleet_StatusLineY_coords[2] = [$ShipInFleet_StatusLine_coords[0][1], $ShipInFleet_StatusLine_coords[3][1]]
+	MouseMove($VEGA_win_pos[0],$VEGA_win_pos[1])
+	Sleep(1000)
+	For $i=0 to 5
+		local $k=1
+		local $coordX= $ShipInFleet_StatusLine_coords[$i][0]+1
+		local $coordY= $ShipInFleet_StatusLine_coords[$i][1]
+		ConsoleWrite('$coordX0 = '& $coordX& @CRLF)
+		For $n=1 to 5
+
+			$coordX += $delta_StatusLineX_coords[$n]*$k
+			ConsoleWrite('['&$n&']' & "delta = "&$delta_StatusLineX_coords[$n]& '$coordX= '&$coordX & @CRLF)
+			local $fleet_demaged = PixelSearch($coordX, $coordY, $coordX, $coordY+1, 0x5095A5,25)
+			sleep(200)
+			If IsArray($fleet_demaged) > 0 Then
+				ConsoleWrite('['&$n&']' & " BLUE " & 'x = '& $coordX & @CRLF)
+				$k=1
+			Else
+				ConsoleWrite('['&$n&']' & " RED " & 'x = '& $coordX  & @CRLF)
+				$k=-1
+			EndIf
+		Next
+		$coordX += $delta_StatusLineX_coords[6]*$k
+		MouseMove($coordX, $coordY)
+
+;~ 		MouseMove($ShipInFleet_StatusLine_coords[$i][0],$ShipInFleet_StatusLine_coords[$i][1])
+;~ 		Sleep(1000)
+		local $fleet_demaged = PixelSearch($ShipInFleet_StatusLine_coords[$i][0] , $ShipInFleet_StatusLine_coords[$i][1], $ShipInFleet_StatusLine_coords[$i][0], $ShipInFleet_StatusLine_coords[$i][1]+1, 0x5095A5,25) ;только красненькие 0x713838
+		sleep(200)
+		If IsArray($fleet_demaged) > 0 Then
+			ConsoleWrite($i & " BLUE " & @CRLF)
+		Else
+			local $fleet_demaged = PixelSearch($ShipInFleet_StatusLine_coords[$i][0] , $ShipInFleet_StatusLine_coords[$i][1], $ShipInFleet_StatusLine_coords[$i][0], $ShipInFleet_StatusLine_coords[$i][1]+1, 0x331B1E,25) ;только красненькие 0x713838
+			sleep(200)
+			If IsArray($fleet_demaged) > 0 Then
+				ConsoleWrite($i & " RED " & @CRLF)
+			Else
+				Local $ferrColor = Hex(PixelGetColor($ShipInFleet_StatusLine_coords[$i][0],$ShipInFleet_StatusLine_coords[$i][1]))
+				ConsoleWrite($i & " $ferrColor " & $ferrColor& @CRLF)
+			EndIf
+		EndIf
+
+;~ 		MouseMove($ShipInFleet_StatusLine_coords[$i][0]+107,$ShipInFleet_StatusLine_coords[$i][1])
+;~ 		Sleep(1000)
+		local $fleet_demaged = PixelSearch($ShipInFleet_StatusLine_coords[$i][0]+107 , $ShipInFleet_StatusLine_coords[$i][1], $ShipInFleet_StatusLine_coords[$i][0]+107, $ShipInFleet_StatusLine_coords[$i][1]+1, 0x5095A5,25) ;только красненькие 0x713838
+		sleep(200)
+		If IsArray($fleet_demaged) > 0 Then
+			ConsoleWrite($i & " BLUE " & @CRLF)
+		Else
+			local $fleet_demaged = PixelSearch($ShipInFleet_StatusLine_coords[$i][0]+107 , $ShipInFleet_StatusLine_coords[$i][1], $ShipInFleet_StatusLine_coords[$i][0]+107, $ShipInFleet_StatusLine_coords[$i][1]+1, 0x331B1E,25) ;только красненькие 0x713838
+			sleep(200)
+			If IsArray($fleet_demaged) > 0 Then
+				ConsoleWrite($i & " RED " & @CRLF)
+			Else
+				Local $ferrColor = Hex(PixelGetColor($ShipInFleet_StatusLine_coords[$i][0]+107,$ShipInFleet_StatusLine_coords[$i][1]))
+				ConsoleWrite($i & " $ferrColor " & $ferrColor& @CRLF)
+			EndIf
+		EndIf
+	Next
+EndFunc
+
+Func test1()
 	MouseMove($VEGA_win_pos[0],$VEGA_win_pos[1])
 	Sleep(1000)
 	For $i=0 to 5
@@ -425,9 +567,6 @@ Func VEGA_IfWinActive()
 			$btn_Tags_list[10][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+307
 			$btn_Tags_list[11][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
 			$btn_Tags_list[11][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+361
-			;~ $btn_Tags_list[12][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
-			;~ $btn_Tags_list[12][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+415
-
 			; TODO - extend list to all targs
 
 			local $btn_coords_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]-90
@@ -457,7 +596,6 @@ Func VEGA_IfWinActive()
 			Global $FleetManagerClosebtn_coords[2]
 			$FleetManagerClosebtn_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+480
 			$FleetManagerClosebtn_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-354
-
 
 			Global $RepairFleetBtn[2]
 			$RepairFleetBtn[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+372
@@ -524,6 +662,15 @@ Func VEGA_IfWinActive()
 
 			$ShipInFleet_StatusLine_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
 			$ShipInFleet_StatusLine_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
+
+			$ShipInFleet_StatusLine_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-191
+			$ShipInFleet_StatusLine_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
+
+			$ShipInFleet_StatusLine_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-56
+			$ShipInFleet_StatusLine_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
+
+			$ShipInFleet_StatusLine_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
+			$ShipInFleet_StatusLine_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
 
 
 			Global $LastShip_coords[2]
@@ -1090,7 +1237,6 @@ Func VEGA_ReturnFleet($Fleet=0)
 EndFunc
 
 Func Quit()
-;~    MsgBox(0,"","Exit key. Bot ends with "& $i &" itterations",5)
 	ConsoleWrite("Exit using key F6"&@CRLF)
 	Exit
 EndFunc
