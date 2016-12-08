@@ -2,18 +2,18 @@
 #include <Array.au3>
 #include <ImageSearch2015.au3>
 #include <AutoItConstants.au3>
-;~ Global $title_main = "KIXEYE.com - Mozilla Firefox"
-;~ Global $title_main = "KIXEYE - VEGA Conflict - Mozilla Firefox"
+Global $VEGA_win[2]	;VEGA winhandle and control if any
+Global $VEGA_win_pos[4];=WinGetPos  ( "VEGA 55Conflict" )
+;~ "KIXEYE.com - Mozilla Firefox"
+;~ "KIXEYE - VEGA Conflict - Mozilla Firefox"
 Global $title_main = "[REGEXPTITLE:KIXEYE.*]"
 Global $Debug_sleep=1000
 Global $actionOnlyRepair=0		; !только ремонт!
 Global $actionReturnFleets=0
 Global $wait_attack_max_time=8000 ; in milliseconds3e
-HotKeySet("p", "findReadyFleet")
 HotKeySet("x", "VEGA_exit")
 HotKeySet("{F6}","Quit")
 Global $btn_Fleet[7][4]
-
 ;------------------
 ; активные флоты
 ;------------------
@@ -23,107 +23,85 @@ If IsArray($fleetActive) Then
 	ConsoleWrite("$fleetActive ="& UBound($fleetActive)-1&@CRLF )
 	For $p=1 To $fleetActive[0]
 		$fleetActive[$p] = $fleetActive[$p]-1
-		ConsoleWrite('$fleetActive['&$p&']= '&$fleetActive[$p] & @LF)
 	Next
 EndIf
 ;-----------------
 ; активные цели
 ;-----------------
-Local $targets_data = "2,3"
+Local $targets_data = "1,5,3"
 Global $targets_Array=StringSplit($targets_data, ",")
-Global $arrayTargetsLenght = UBound($targets_Array)
 If IsArray($targets_Array) Then
-	local $arrayLenght2 = UBound($targets_Array)
-	ConsoleWrite("$targets_Array ="& $arrayLenght2-1&@CRLF )
+	ConsoleWrite("$targets_Array ="& UBound($targets_Array)-1&@CRLF )
 	For $p=1 To $targets_Array[0]
 		$targets_Array[$p] = $targets_Array[$p]-1
-		ConsoleWrite('$targets_Array['&$p&']= '&$targets_Array[$p] & @LF)
 	Next
 EndIf
 
-Global $VEGA_win[2]	;VEGA winhandle and control if any
-Global $VEGA_win_pos[4];=WinGetPos  ( "VEGA 55Conflict" )
-Global $cap_left_game_img
-$cap_left_game_img='img\cap_left_deck.gif'
-Global $btn_reload_game[2]
-Global $lost_connection_img='img\lost_connection.gif'
-Global $btn_reload_game[2]
-Global $btn_fleet_under_attack='img\fleet\fleet_under_attack.gif'
-Global $btn_fleet_under_attack_ignore[2]
-Global $btn_Fleet_img[9]
-$btn_Fleet_img[0]='img\fleet\fleet_empty.gif'
-; 0 = empty fleet
-$btn_Fleet_img[1]='img\fleet\fleet_inport_ok.gif'
-; 1 = in port ok
-$btn_Fleet_img[2]='img\fleet\fleet_inport_dmg.gif'
-; 2 = in port damaged
-$btn_Fleet_img[3]='img\fleet\fleet_idle_out_ok.gif'
-; 3 = idle ok
-$btn_Fleet_img[4]='img\fleet\fleet_idle_out_dmg.gif'
-; 4 = idle damaged
-$btn_Fleet_img[5]='img\fleet\fleet_moving_ok.gif'
-; 5 = moving ok
-$btn_Fleet_img[6]='img\fleet\fleet_moving_dmg.gif'
-; 6 = moving damaged
-$btn_Fleet_img[7]='img\fleet\fleet_action.gif'
-; 7 = in action/battle
-$btn_Fleet_img[8]='img\fleet\fleet_inport_repairing.gif'
-; 8 = repairing
+Func settingsImg ()
+	Global $cap_left_game_img
+	$cap_left_game_img='img\cap_left_deck.gif'
+	Global $btn_reload_game[2]
+	Global $lost_connection_img='img\lost_connection.gif'
+	Global $btn_reload_game[2]
+	Global $btn_fleet_under_attack='img\fleet\fleet_under_attack.gif'
+	Global $btn_fleet_under_attack_ignore[2]
+	Global $btn_Fleet_img[9]
+	$btn_Fleet_img[0]='img\fleet\fleet_empty.gif'
+	; 0 = empty fleet
+	$btn_Fleet_img[1]='img\fleet\fleet_inport_ok.gif'
+	; 1 = in port ok
+	$btn_Fleet_img[2]='img\fleet\fleet_inport_dmg.gif'
+	; 2 = in port damaged
+	$btn_Fleet_img[3]='img\fleet\fleet_idle_out_ok.gif'
+	; 3 = idle ok
+	$btn_Fleet_img[4]='img\fleet\fleet_idle_out_dmg.gif'
+	; 4 = idle damaged
+	$btn_Fleet_img[5]='img\fleet\fleet_moving_ok.gif'
+	; 5 = moving ok
+	$btn_Fleet_img[6]='img\fleet\fleet_moving_dmg.gif'
+	; 6 = moving damaged
+	$btn_Fleet_img[7]='img\fleet\fleet_action.gif'
+	; 7 = in action/battle
+	$btn_Fleet_img[8]='img\fleet\fleet_inport_repairing.gif'
+	; 8 = repairing
 
-Global $btn_Fleet_manage_img='img\fleet_manage.gif'
-Global $btn_Fleet_menu_img='img\fleet_menu.gif' ;fleet menu img
-Global $btn_Fleet_menu[3][2] ;x/y position of 3 states menu
-Global $btn_Attack_active_img='img\attack_active.gif'
-Global $btn_Fleet_warp_img='img\fleet_warp_img.gif'
+	Global $btn_Fleet_manage_img='img\fleet_manage.gif'
+	Global $btn_Fleet_menu_img='img\fleet_menu.gif' ;fleet menu img
+	Global $btn_Fleet_menu[3][2] ;x/y position of 3 states menu
+	Global $btn_Attack_active_img='img\attack_active.gif'
+	Global $btn_Fleet_warp_img='img\fleet_warp_img.gif'
 
-;bottom buttons coords
-local $btn_coords_y1=985
-local $btn_coords_y2=1052
+	;bottom buttons coords
+	local $btn_coords_y1=985
+	local $btn_coords_y2=1052
 
-; INSTANT REPAIR BUTTON
-;KIXEYE
-;~ Global $btn_repair_image='fleet_instant_repair.gif';
-global $y = 0, $x = 0
-;FB
-Global $btn_repair_image='img\fleet_instant_repair_fb_selected.gif';
-Global $btn_repair_fleet_img='img\fleet_repair_btn.png'
-Global $btn_repair_instant_planet_img='img\fleet_instant_free_planet_01.png'
+	; INSTANT REPAIR BUTTON
+	;KIXEYE
+	;~ Global $btn_repair_image='fleet_instant_repair.gif';
+	global $y = 0, $x = 0
+	;FB
+	Global $btn_repair_image='img\fleet_instant_repair_fb_selected.gif';
+	Global $btn_repair_fleet_img='img\fleet_repair_btn.png'
+	Global $btn_repair_instant_planet_img='img\fleet_instant_free_planet_01.png'
 
-Global $img_btn_remove_from_fleet='img\remove_from_fleet.bmp'
-Global $img_btn_add_to_fleet='img\add_to_fleet.bmp'
-Global $img_btn_launch_fleet='img\launch_fleet.bmp'
-
-
-; change from left
-
+	Global $img_btn_remove_from_fleet='img\remove_from_fleet.bmp'
+	Global $img_btn_add_to_fleet='img\add_to_fleet.bmp'
+	Global $img_btn_launch_fleet='img\launch_fleet.bmp'
+EndFunc
 
 ;##################1#########################
 ; need to convert to % from top/bottom/right
 ;###########################################
-
+settingsImg()
 Vega_Active()
 VEGA_Calibrate()
 VEGA_Main()
 ;~ test4()
-;~ VEGA_RepairFleet(3)
-
-Func test4()
-
-EndFunc
-
-;~ #include <MsgBoxConstants.au3>
-;~ Local $hTimer = TimerInit() ; Begin the timer and store the handle in a variable.
-;~ Sleep(3000) ; Sleep for 3 seconds.
-;~ Local $fDiff = TimerDiff($hTimer) ; Find the difference in time from the previous call of TimerInit. The variable we stored the TimerInit handlem is passed as the "handle" to TimerDiff.
-;~ MsgBox($MB_SYSTEMMODAL, "Time Difference", $fDiff)
-
 
 Func test2()
-
 EndFunc
 
 Func test1()
-
 EndFunc
 
 Func Vega_Active()
@@ -136,8 +114,7 @@ EndFunc
 
 Func VEGA_Main()
 while 1 ;main loop
-   sleep(200)
-;~    for $i=$fleetActive_b to $fleetActive_e step 1 ;for $i=0 to 6 step 1
+	sleep(200)
 	For $i=1 To $fleetActive[0]
 		local $currentFleet = $fleetActive[$i]
 	  ; 0 = empty fleet
@@ -149,68 +126,63 @@ while 1 ;main loop
 	  ; 6 = moving damaged
 	  ; 7 = in action/battle
 	  ; 8 = repairing
-	  local $FleetStatus=VEGA_CheckFleet($currentFleet);
-;~ 	  ConsoleWrite('$FleetStatus '& $FleetStatus&@CRLF)
-	  switch $FleetStatus
-	  Case 0,5,6,7,8	; 8 - check for free repair later
-		 ;ConsoleWrite('fleet '&$i&' is unusable for action'&@CRLF)
-		 sleep (250)
-	 Case 1,3
-		 if ($actionOnlyRepair=0) Then
-			 ConsoleWrite('fleet '&$currentFleet+1&' in port/idle and ok -> action'&@CRLF)
-			 ;MouseClick('left',$btn_Fleet[$i][0]+($btn_Fleet[$i][2]-$btn_Fleet[$i][0])/2,$btn_Fleet[$i][1]+($btn_Fleet[$i][3]-$btn_Fleet[$i][1])/2,1,1)
-			 Send($currentFleet+1)
-			 VEGA_attack_target($currentFleet,-1) ;$fleet, $tag_number
-			 sleep(400)
-		 EndIf
-	  Case 2
-		 ConsoleWrite('fleet '&$currentFleet+1&' in port and damaged -> repair'&@CRLF)
+		local $FleetStatus=VEGA_CheckFleet($currentFleet);
+		switch $FleetStatus
+		Case 0,5,6,7,8	; 8 - check for free repair later
+			sleep (250)
+		Case 1,3
+			if ($actionOnlyRepair=0) Then
+				ConsoleWrite('fleet '&$currentFleet+1&' in port/idle and ok -> action'&@CRLF)
+				Send($currentFleet+1)
+				VEGA_attack_target($currentFleet,-1) ;$fleet, $tag_number
+				sleep(400)
+			EndIf
+		Case 2
+			ConsoleWrite('fleet '&$currentFleet+1&' in port and damaged -> repair'&@CRLF)
 			if VEGA_RepairFleet($currentFleet) Then
-			   consolewrite ('repaired')
+				consolewrite ('repaired')
 			Else
-			   consolewrite ('error, not repaired')
+				consolewrite ('error, not repaired')
 			Endif
+			sleep (400)
+		Case 4
+			ConsoleWrite('fleet '&$currentFleet+1&' is idle and damaged -> consider action'&@CRLF)
+			VEGA_ReturnFleet($currentFleet)
+		Case Else
+			ConsoleWrite ('Something went horribly wrong. fleet status is: '&$FleetStatus&@CRLF)
+			local $search=_ImageSearchArea($btn_fleet_under_attack, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
+			If $search = 1 Then
+				ConsoleWrite('fleet is under attack! trying to ignore...'&@CRLF)
+				MouseClick($btn_fleet_under_attack_ignore[0],$btn_fleet_under_attack_ignore[1],1,1)
+			Else
+				ConsoleWrite('fleet is not under attack'&@CRLF)
+			EndIf
 
-		 sleep (400)
-	  Case 4
-		 ConsoleWrite('fleet '&$currentFleet+1&' is idle and damaged -> consider action'&@CRLF)
-		 VEGA_ReturnFleet($currentFleet)
-	  Case Else
-		 ConsoleWrite ('Something went horribly wrong. fleet status is: '&$FleetStatus&@CRLF)
-		 local $search=_ImageSearchArea($btn_fleet_under_attack, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
-		 If $search = 1 Then
-			ConsoleWrite('fleet is under attack! trying to ignore...'&@CRLF)
-			MouseClick($btn_fleet_under_attack_ignore[0],$btn_fleet_under_attack_ignore[1],1,1)
-		 Else
-			ConsoleWrite('fleet is not under attack'&@CRLF)
-		 EndIf
+			ConsoleWrite ('find if capt left the deck'&@CRLF)
+			local $search = _ImageSearchArea($cap_left_game_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
+			if $search = 1 Then
+				ConsoleWrite('Capt left the deck, reloading game'&@CRLF)
+				sleep (500)
+				MouseMove($btn_reload_game[0],$btn_reload_game[1],50)
+				MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
+				MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
+				sleep (5000)
+			Else
+				ConsoleWrite('Capt on deck'&@CRLF)
+			EndIf
 
-		 ConsoleWrite ('find if capt left the deck'&@CRLF)
-		 local $search = _ImageSearchArea($cap_left_game_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
-		 if $search = 1 Then
-			ConsoleWrite('Capt left the deck, reloading game'&@CRLF)
-			sleep (500)
-			MouseMove($btn_reload_game[0],$btn_reload_game[1],50)
-			MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
-			MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
-			sleep (5000)
-		 Else
-			ConsoleWrite('Capt on deck'&@CRLF)
-		 EndIf
-
-		 ConsoleWrite ('find if lost connection'&@CRLF)
-		 local $search = _ImageSearchArea($lost_connection_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
-		 if $search = 1 Then
-			ConsoleWrite('connection lost, reloading game'&@CRLF)
-			MouseMove($btn_reload_game[0],$btn_reload_game[1],30)
-			sleep (200)
-			MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
-			sleep (5000)
-		 Else
-			ConsoleWrite('connection not lost'&@CRLF)
-		 EndIf
-
-	  EndSwitch
+			ConsoleWrite ('find if lost connection'&@CRLF)
+			local $search = _ImageSearchArea($lost_connection_img, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
+			if $search = 1 Then
+				ConsoleWrite('connection lost, reloading game'&@CRLF)
+				MouseMove($btn_reload_game[0],$btn_reload_game[1],30)
+				sleep (200)
+				MouseClick($btn_reload_game[0],$btn_reload_game[1],1,5)
+				sleep (5000)
+			Else
+				ConsoleWrite('connection not lost'&@CRLF)
+			EndIf
+		EndSwitch
    Next
 WEnd
 EndFunc
@@ -218,7 +190,6 @@ EndFunc
 Func SetFleetMenu() ;set fleet menu to correct state
 	;find fleet menu $btn_Fleet_img[10]
 	ConsoleWrite (@CRLF&'|'&$VEGA_win_pos[0]&'|'&$VEGA_win_pos[1]&'|'&$VEGA_win_pos[2]&'|'&$VEGA_win_pos[3]&'|'&@CRLF)
-
 
 	local $x
 	local $y
@@ -245,20 +216,6 @@ Func SetFleetMenu() ;set fleet menu to correct state
 		VEGA_Calibrate()
 		;WinActivate ( "VEGA Conflict" )
 		return -1
-	EndIf
-EndFunc
-
-Func findReadyFleet() ;not used
-	local $x
-	local $y
-	Local $search = _ImageSearchArea('img\checkfleet.gif', 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 90 )
-	If $search = 1 Then
-		Beep();
-		;ConsoleWrite("fleet ready location: "&$x&":"&$y&@CRLF)
-		;MouseMove($x, $y, 1)
-	Else
-		;ConsoleWrite("fleet ready location not found"&@CRLF)
-		SetFleetMenu()
 	EndIf
 EndFunc
 
@@ -314,16 +271,10 @@ Func VEGA_IfWinActive()
 
 		local $tmp_VEGA_win_pos=WinGetPos($hControl )
 		If not $tmp_VEGA_win_pos Then
-		;If $VEGA_win_pos[0]=$tmp_VEGA_win_pos[0] and $VEGA_win_pos[1]=$tmp_VEGA_win_pos[1] and $VEGA_win_pos[2]=$tmp_VEGA_win_pos[2] and $VEGA_win_pos[3]=$tmp_VEGA_win_pos[3] Then
-		;	$VEGA_win[0]=$hWnd
-		;	$VEGA_win[1]=$hControl
-		;	Return $VEGA_win ; return handle of VEGA window without calibrating
-		; EndIf
 			$VEGA_win_pos=$tmp_VEGA_win_pos
 			ConsoleWrite("VEGA X:"&$VEGA_win_pos[0]&" Y:"&$VEGA_win_pos[1]&" width:"&$VEGA_win_pos[2]&" height:"&$VEGA_win_pos[3]&@CRLF)
 
 			Global $btn_Fleet_menu[3][2]
-
 			$btn_Fleet_menu[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-280	; From right
 			$btn_Fleet_menu[0][1]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-200
 			$btn_Fleet_menu[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-130
@@ -338,51 +289,42 @@ Func VEGA_IfWinActive()
 			;local $btn_Fleet_Ystart=$VEGA_win_pos[1]+406
 
 			Global $btn_Fleet[7][4]
-
 ; Find where is -7 delta from center comes
-
 			;Fleet 1
 			$btn_Fleet[0][0]=$btn_Fleet_Xstart
 			$btn_Fleet[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-150-7
 			$btn_Fleet[0][2]=$btn_Fleet_Xend
 			$btn_Fleet[0][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
-
 			;Fleet 2
 			$btn_Fleet[1][0]=$btn_Fleet_Xstart
 			$btn_Fleet[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-107-7
 			$btn_Fleet[1][2]=$btn_Fleet_Xend
 			$btn_Fleet[1][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
-
 			;Fleet 3
 			$btn_Fleet[2][0]=$btn_Fleet_Xstart
 			$btn_Fleet[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-64-7
 			$btn_Fleet[2][2]=$btn_Fleet_Xend
 			$btn_Fleet[2][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
-
 			;Fleet 4
 			$btn_Fleet[3][0]=$btn_Fleet_Xstart
 			$btn_Fleet[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-22-7
 			$btn_Fleet[3][2]=$btn_Fleet_Xend
 			$btn_Fleet[3][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
-
 			;Fleet 5
 			$btn_Fleet[4][0]=$btn_Fleet_Xstart
 			$btn_Fleet[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+22-7
 			$btn_Fleet[4][2]=$btn_Fleet_Xend
 			$btn_Fleet[4][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
-
 			;Fleet 6
 			$btn_Fleet[5][0]=$btn_Fleet_Xstart
 			$btn_Fleet[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+64-7
 			$btn_Fleet[5][2]=$btn_Fleet_Xend
 			$btn_Fleet[5][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
-
 			;Fleet 7
 			$btn_Fleet[6][0]=$btn_Fleet_Xstart
 			$btn_Fleet[6][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+107-7
 			$btn_Fleet[6][2]=$btn_Fleet_Xend
 			$btn_Fleet[6][3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+150-7
-
 
 			Global $btn_Tags_main[2]
 			$btn_Tags_main[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]-193 ;from right
@@ -422,7 +364,6 @@ Func VEGA_IfWinActive()
 			$btn_Tags_list[10][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+307
 			$btn_Tags_list[11][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
 			$btn_Tags_list[11][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+361
-			; TODO - extend list to all targs
 
 			local $btn_coords_y1=$VEGA_win_pos[1]+$VEGA_win_pos[3]-90
 			local $btn_coords_y2=$VEGA_win_pos[1]+$VEGA_win_pos[3]
@@ -457,76 +398,52 @@ Func VEGA_IfWinActive()
 			$RepairFleetBtn[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+113
 
 			Global $btn_repair_cost_coords[4]
-			; KIXYEY site
-			;btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-310
-			;$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-90
-			;$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+445
-			;$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
-
-			; FACEBOOK site
 			$btn_repair_cost_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+200
 			$btn_repair_cost_coords[1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-100
 			$btn_repair_cost_coords[2]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+500
 			$btn_repair_cost_coords[3]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-35
 
-
 			Global $ShipInFleet_coords[6][2]
 			$ShipInFleet_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
 			$ShipInFleet_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
-
 			$ShipInFleet_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
 			$ShipInFleet_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
-
 			$ShipInFleet_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+135
 			$ShipInFleet_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-156
-
 			$ShipInFleet_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-135
 			$ShipInFleet_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
-
 			$ShipInFleet_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-0
 			$ShipInFleet_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
-
 			$ShipInFleet_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+135
 			$ShipInFleet_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-21
 
 			Global $ShipInFleet_StatusRedGreenNumber_coords[6][2]
 			$ShipInFleet_StatusRedGreenNumber_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
 			$ShipInFleet_StatusRedGreenNumber_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
 			$ShipInFleet_StatusRedGreenNumber_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
 			$ShipInFleet_StatusRedGreenNumber_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
 			$ShipInFleet_StatusRedGreenNumber_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
 			$ShipInFleet_StatusRedGreenNumber_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-197
-
 			$ShipInFleet_StatusRedGreenNumber_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-194
 			$ShipInFleet_StatusRedGreenNumber_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
-
 			$ShipInFleet_StatusRedGreenNumber_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-59
 			$ShipInFleet_StatusRedGreenNumber_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
-
 			$ShipInFleet_StatusRedGreenNumber_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+76
 			$ShipInFleet_StatusRedGreenNumber_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-62
 
 			Global $ShipInFleet_StatusLine_coords[6][3]
 			$ShipInFleet_StatusLine_coords[0][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-191
 			$ShipInFleet_StatusLine_coords[0][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
-
 			$ShipInFleet_StatusLine_coords[1][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-56
 			$ShipInFleet_StatusLine_coords[1][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
-
 			$ShipInFleet_StatusLine_coords[2][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
 			$ShipInFleet_StatusLine_coords[2][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2-98
-
 			$ShipInFleet_StatusLine_coords[3][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-191
 			$ShipInFleet_StatusLine_coords[3][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
-
 			$ShipInFleet_StatusLine_coords[4][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-56
 			$ShipInFleet_StatusLine_coords[4][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
-
 			$ShipInFleet_StatusLine_coords[5][0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2+79
 			$ShipInFleet_StatusLine_coords[5][1]=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2+36
-
 
 			Global $LastShip_coords[2]
 			$LastShip_coords[0]=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2-433
@@ -582,7 +499,6 @@ Func VEGA_Calibrate() ;not used - use for relative coords
 		EndIf
 
 		local $hControl=VEGA_IfWinActive()
-
 		if $hControl = 0 Then
 			ConsoleWrite('VEGA window is not ACTIVE!'&@CRLF&'handle'&@CRLF)
 			if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
@@ -597,33 +513,14 @@ Func VEGA_Calibrate() ;not used - use for relative coords
 			if ControlFocus ($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]") =1 Then
 				ConsoleWrite('Ok set control focus'&@CRLF)
 				;$VEGA_win_pos=ControlGetPos($VEGA_win[0], "", "[CLASS:Unity.WebPlayer]");
-
 				Sleep (2000)
 				return 0
 			else
 				ConsoleWrite('ERROR setting focus to control'&@CRLF)
-				Sleep (5000)
+				Sleep (3000)
 			EndIf
 		EndIf
 	WEnd
-
-	; code up to EndFunc should be removed
-
-	local $x
-	local $y
-	Local $search = _ImageSearchArea('img\BuildIcon.bmp', 0, 1, 1, 4096, 2048, $x, $y, 100 )
-	If $search = 1 Then
-		Beep();
-		ConsoleWrite("build location: "&$x&":"&$y&@CRLF)
-		MouseMove($x, $y, 1)
-	Else
-		ConsoleWrite("build location not found"&@CRLF)
-	EndIf
-
-   ;VEGA_IfInBase ()
-   ;VEGA_IfInPlanet ()
-   ;VEGA_IfInSector ()
-   ;VEGA_clickBase ()
 EndFunc
 
 Func VEGA_exit ()
@@ -671,10 +568,6 @@ Func VEGA_RepairIsFree()
 	local $x=0
 	local $y=0
 
-	;Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 90 )
-	;Works w/Kixeye
-	;Local $search = _ImageSearchArea( $btn_repair_image, 0, $VEGA_win_pos[0], $VEGA_win_pos[1], $VEGA_win_pos[0]+$VEGA_win_pos[2], $VEGA_win_pos[1]+$VEGA_win_pos[3], $x, $y, 70 )
-	; Facebook
 	Local $search = _ImageSearchArea( $btn_repair_image, 0, $btn_repair_cost_coords[0], $btn_repair_cost_coords[1], $btn_repair_cost_coords[2], $btn_repair_cost_coords[3], $x, $y, 70 )
 	if $search = 1 Then
 		ConsoleWrite ('found repair is free '&$x&':'&$y&@CRLF)
@@ -686,27 +579,21 @@ Func VEGA_RepairIsFree()
 	else
 		ConsoleWrite ($search&@CRLF)
 		ConsoleWrite ('repair is free not found '&$btn_repair_cost_coords[0]&"x"&$btn_repair_cost_coords[1]&" "&$btn_repair_cost_coords[2]&"x"&$btn_repair_cost_coords[3]&@CRLF)
-;~   	 MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[1],50)
-;~ 	  	MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[1],40)
-;~ 	  	MouseMove($btn_repair_cost_coords[2],$btn_repair_cost_coords[3],40)
-;~ 	  	MouseMove($btn_repair_cost_coords[0],$btn_repair_cost_coords[3],40)
 		return False
 	EndIf
-	;sleep (10000)
 	return False
 EndFunc
 
 Func Vega_RemoveShip($ship_numb)
-	;MouseMove($ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1)
 	sleep(100)
 	MouseMove($ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1)
 	MouseClick('left',$ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1,1)
-	sleep(500)
+	sleep(400)
 
 	local $x=0
 	local $y=0
 	Local $search = _ImageSearchArea( $img_btn_remove_from_fleet, 1, $btn_remove_from_fleet[0], $btn_remove_from_fleet[1], $btn_remove_from_fleet[2], $btn_remove_from_fleet[3], $x, $y, 70 )
-	sleep(300)
+	sleep(200)
 	if $search = 1 Then
 		ConsoleWrite ('found remove_from_fleet btn '&$x&':'&$y&@CRLF)
 		MouseClick('left',$x,$y,1,1)
@@ -715,8 +602,6 @@ Func Vega_RemoveShip($ship_numb)
 	Else
 		ConsoleWrite ('not found remove_from_fleet btn '&$x&':'&$y&@CRLF)
 	EndIf
-	;~    MouseClick('left',$ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],2,1)
-;~    sleep(100)
 EndFunc
 
 Func Vega_AddShip($ship_numb)
@@ -725,7 +610,7 @@ Func Vega_AddShip($ship_numb)
 	sleep(100)
 	MouseClick('left',$ShipInFleet_coords[$ship_numb][0],$ShipInFleet_coords[$ship_numb][1],1,5)
 	sleep(500)
-	sleep(200)
+;~ 	sleep(200)
 	MouseMove($LastShip_page[0],$LastShip_page[1],1)
 	sleep(100)
 	MouseClick('left',$LastShip_page[0],$LastShip_page[1],1,1)
@@ -738,7 +623,7 @@ Func Vega_AddShip($ship_numb)
 	local $x=0
 	local $y=0
 	Local $search = _ImageSearchArea( $img_btn_add_to_fleet, 1, $btn_add_to_fleet[0], $btn_add_to_fleet[1], $btn_add_to_fleet[2], $btn_add_to_fleet[3], $x, $y, 70 )
-	sleep(300)
+	sleep(200)
 	if $search = 1 Then
 		ConsoleWrite ('found add_to_fleet btn '&$x&':'&$y&@CRLF)
 		MouseClick('left',$x,$y,1,1)
@@ -747,69 +632,7 @@ Func Vega_AddShip($ship_numb)
 	Else
 		ConsoleWrite ('not found add_to_fleet btn '&$x&':'&$y&@CRLF)
 	EndIf
-
-;~    sleep(50)
-;~    MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,5)
-	;sleep(10)
-	;MouseClick('left',$LastShip_coords[0],$LastShip_coords[1],1,1)
 	sleep(300)
-EndFunc
-
-Func VEGA_RepairFleet3($FleetNumber=0) ;repairing fleet in FLEET MANGER
-	sleep (500)
-	Global $arrRepairFleet[0]
-	if VEGA_IfManageBtn('click',$FleetNumber) <> -1 Then; is button manage clicked ?
-		if VEGA_RepairIsFree() Then
-			ConsoleWrite("Fleet repaired, closing fleet manager");
-			VEGA_FleetManagerClose()
-			return 1 ;FleetRepaired
-		EndIf
-
-		; разбираем флот для ремонта
-		for $i=0 to 5 step 1	;for each ship in fleet
-			local $fleet_demaged = PixelSearch($ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1], $ShipInFleet_StatusRedGreenNumber_coords[$i][0]+2, $ShipInFleet_StatusRedGreenNumber_coords[$i][1]-2, 0x73393A,25) ;только красненькие 0x713838
-			sleep (200)
-			If IsArray($fleet_demaged) > 0 Then
-				ConsoleWrite("Ship["&$i & "] - RED " & @CRLF)
-				Vega_RemoveShip($i)
-				; заполняем массив нашими ранеными
-				_ArrayAdd($arrRepairFleet, $i)
-				Sleep (200)
-				if (VEGA_RepairIsFree()) Then ExitLoop
-			Else
-				ConsoleWrite("Ship["&$i & "] - GREEN " & @CRLF)
-			EndIf
-		Next
-
-;~ 		For $i=0 to 5
-;~ 		$fleet_demaged = PixelSearch($ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1], $ShipInFleet_StatusRedGreenNumber_coords[$i][0]+2, $ShipInFleet_StatusRedGreenNumber_coords[$i][1]-2, 0x73393A,25) ;только красненькие 0x713838
-;~ 		sleep(200)
-;~ 		If IsArray($fleet_demaged) > 0 Then
-;~ 			ConsoleWrite($i & " RED " & @CRLF)
-;~ 		Else
-;~ 			ConsoleWrite($i & " GREEN " & @CRLF)
-;~ 		EndIf
-;~ 		Next
-
-		; собираем флот обратно
-		If IsArray($arrRepairFleet) Then
-			local $arrayLenght = UBound($arrRepairFleet)
-			_ArrayReverse($arrRepairFleet)
-			For $k=0 To $arrayLenght-1
-;~ 				ConsoleWrite($arrRepairFleet[$k] & @LF)
-				Vega_AddShip($arrRepairFleet[$k])
-				sleep(300)
-				VEGA_RepairIsFree()
-				sleep(250)
-			Next
-		EndIf
-
-		MouseClick('left',$RepairFleetBtn[0],$RepairFleetBtn[1],1,1)
-		sleep (200)
-		VEGA_FleetManagerClose()
-	EndIf
-   ;ConsoleWrite ('return from repairing -1'&@CRLF)
-	return -1 ;manage button not clicked
 EndFunc
 
 Func VEGA_RepairFleet($FleetNumber=0) ;repairing fleet in FLEET MANGER
@@ -830,7 +653,7 @@ Func VEGA_RepairFleet($FleetNumber=0) ;repairing fleet in FLEET MANGER
 			local $fleet_demaged = PixelSearch($ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1],$ShipInFleet_StatusRedGreenNumber_coords[$i][0] , $ShipInFleet_StatusRedGreenNumber_coords[$i][1], 0x73393A,25) ;только красненькие 0x713838
 			sleep (200)
 			If IsArray($fleet_demaged) > 0 Then
-				ConsoleWrite("Ship["&$i & "] - RED " & @CRLF)
+;~ 				ConsoleWrite("Ship["&$i & "] - RED " & @CRLF)
 				; заполняем массив нашими ранеными
 				_ArrayAdd($arrRepairFleet, $i)
 				local $fleet_demaged2 = PixelSearch($coordX+107, $coordY, $coordX, $coordY+1, 0x5095A5,25)
@@ -842,7 +665,7 @@ Func VEGA_RepairFleet($FleetNumber=0) ;repairing fleet in FLEET MANGER
 				EndIf
 ;~ 				Sleep (200)
 			Else
-				ConsoleWrite("Ship["&$i & "] - GREEN " & @CRLF)
+;~ 				ConsoleWrite("Ship["&$i & "] - GREEN " & @CRLF)
 			EndIf
 		Next
 
@@ -851,36 +674,22 @@ Func VEGA_RepairFleet($FleetNumber=0) ;repairing fleet in FLEET MANGER
 ;~ 		Next
 		_ArraySort($arrRepairFleet, 0, 0, 0, 1)
 		For $p=0 To UBound($arrRepairFleet)-1
-			ConsoleWrite('damage['&$arrRepairFleet[$p][0]&']= '& $arrRepairFleet[$p][1]& @CRLF)
-		Next
-
-		For $p=0 To UBound($arrRepairFleet)-1
 			Vega_RemoveShip($arrRepairFleet[$p][0])
 			_ArrayAdd($arrNeedRepair, $arrRepairFleet[$p][0])
 			Sleep (200)
 			if (VEGA_RepairIsFree()) Then ExitLoop
 		Next
-
 		_ArrayReverse($arrNeedRepair)
-		For $p=0 To UBound($arrNeedRepair)-1
-			ConsoleWrite('_ArrayReverse damage['&$arrNeedRepair[$p]&'] '& @CRLF)
-		Next
-;~ 		For $p=0 To UBound($arrRepairFleet)-1
-;~ 			ConsoleWrite('damage['&$arrRepairFleet[$p][0]&']= '& $arrRepairFleet[$p][1]&', '& $arrRepairFleet[$p][2]& @CRLF)
-;~ 		Next
 
 		; собираем флот обратно
 		If IsArray($arrNeedRepair) Then
 			local $arrayLenght = UBound($arrNeedRepair)
-;~ 			_ArrayReverse($arrRepairFleet)
 			For $k=0 To $arrayLenght-1
-;~ 				if ($arrRepairFleet[$k][2]=1) Then
-					ConsoleWrite($arrNeedRepair[$k] & @LF)
-					Vega_AddShip($arrNeedRepair[$k])
-					sleep(300)
-					VEGA_RepairIsFree()
-					sleep(250)
-;~ 				EndIf
+				ConsoleWrite($arrNeedRepair[$k] & @LF)
+				Vega_AddShip($arrNeedRepair[$k])
+				sleep(300)
+				VEGA_RepairIsFree()
+				sleep(250)
 			Next
 		EndIf
 
@@ -888,7 +697,7 @@ Func VEGA_RepairFleet($FleetNumber=0) ;repairing fleet in FLEET MANGER
 		sleep (200)
 		VEGA_FleetManagerClose()
 	EndIf
-   ;ConsoleWrite ('return from repairing -1'&@CRLF)
+	ConsoleWrite ('return from repairing -1'&@CRLF)
 	return -1 ;manage button not clicked
 EndFunc
 
@@ -900,25 +709,17 @@ Func VEGA_FleetManagerClose()
 EndFunc
 
 func VEGA_IfManageBtn($action='' , $fleet=0)
-	;MouseMove($btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,1)
 	sleep(300)
 	send($fleet+1)
-	;mouseclick('left',$btn_Fleet[$fleet][0]+($btn_Fleet[$fleet][2]-$btn_Fleet[$fleet][0])/2, $btn_Fleet[$fleet][1]+($btn_Fleet[$fleet][3]-$btn_Fleet[$fleet][1])/2,50)
-	;send ("q")
 	sleep(300)
 
 	local $x
 	local $y
-	;MouseMove($btn_coords[0][0], $btn_coords[0][1], 10)
-	;MouseMove($btn_coords[0][2], $btn_coords[0][3], 10)
-	;MouseMove($btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1)
-	;ConsoleWrite('looking for:'&$btn_Fleet_manage_img&' in '&$btn_coords[0][0]&' '& $btn_coords[0][1]&' '&$btn_coords[0][2]&' '&$btn_coords[0][3])
-	sleep(300)
+;~ 	sleep(300)
 	Local $search = _ImageSearchArea($btn_Fleet_manage_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 90 )
 	if $search = 1 Then
 		;Beep();
 		ConsoleWrite("fleet ready for manage, button:"&$x&":"&$y&@CRLF)
-		;MouseMove($x, $y, 100)
 		local $retarr[2]
 		$retarr[0]=$x
 		$retarr[1]=$y
@@ -937,7 +738,6 @@ func VEGA_IfManageBtn($action='' , $fleet=0)
 	return -1
 EndFunc
 
-
 Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 	sleep($Debug_sleep/2)
 
@@ -949,35 +749,26 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 
 	send($Fleet+1)
 
-;~ 	For $vGoToFight In $fleet_ready_arr
-	For $target=1 To $targets_Array[0]
+	For $target=1 To $targets_Array[0]		; For $vGoToFight In $fleet_ready_arr
 		local $currentTarget = $targets_Array[$target]
 		ConsoleWrite('Attacking target: '&$currentTarget&' with fleet '&$Fleet+1&@CRLF)
 		sleep($Debug_sleep)
 		local $try=0
-		; click on target main button
-		;ConsoleWrite('TAGs main x:y is '&$btn_Tags_main[0]&':'&$btn_Tags_main[1]&@CRLF)
 		; кликаем на кнопку BOOKMARKS
 		MouseClick('left',$btn_Tags_main[0],$btn_Tags_main[1],1,1)
-;~ 		MouseMove($btn_Tags_main[0],$btn_Tags_main[1])
 		sleep (250)
 		; click on target page 2
-;~ 		MouseMove($btn_Tags_page[1][0],$btn_Tags_page[1][1])
 		MouseClick('left',$btn_Tags_page[1][0],$btn_Tags_page[1][1],1,1)
 		sleep (250)
 		; click on target 1 in list
 		ConsoleWrite('$target= '&$currentTarget&'   '&$btn_Tags_list[$currentTarget][0]&":"&$btn_Tags_list[$currentTarget][1]&@CRLF)
-;~ 		MouseMove($btn_Tags_list[$target][0],$btn_Tags_list[$target][1])
 		sleep (250)
 		MouseClick('left',$btn_Tags_list[$currentTarget][0],$btn_Tags_list[$currentTarget][1],1,1)
 		; Use exact fleet
 
-		;sleep(2000)
 		sleep (500)
 		local $search= _ImageSearchArea($btn_Attack_active_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 70 )
-
 		if $search = 1 Then
-			;ConsoleWrite ('attack is active'&@CRLF)
 			; center
 			$centre_x=$VEGA_win_pos[0]+$VEGA_win_pos[2]/2
 			$centre_y=$VEGA_win_pos[1]+$VEGA_win_pos[3]/2
@@ -986,8 +777,6 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 			for $k=-1 to 1 step 2
 				for $l=-1 to 1 step 2
 					$try=$try+1
-					;MouseMove($centre_x+50*$l,$centre_y+50*$k,1)
-					;sleep(300)
 					MouseMove( $centre_x+$distanceAtack*$l,$centre_y+$distanceAtack*$k,5)
 					sleep (400)
 					MouseClick('left',$centre_x+$distanceAtack*$l,$centre_y+$distanceAtack*$k,1,5)
@@ -1005,7 +794,6 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 						ConsoleWrite (_NowTime(5)&' warp not active'&@CRLF)
 						sleep (500)
 					EndIf
-					;sleep (200)
 				Next
 			Next
 			if $try=4 Then
@@ -1027,19 +815,16 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 
 			ConsoleWrite(_NowTime(5)&' wait for warping'&@CRLF)
 			Sleep (4250)
+;TODO сделать проверку на возврат кораблей
 
 			local $search= _ImageSearchArea($btn_Attack_active_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 70 )
 			if $search = 1 Then
 				ConsoleWrite(_NowTime(5)&' press attack'&@CRLF)
 				local $search= _ImageSearchArea($btn_Attack_active_img, 0, $btn_coords[0][0], $btn_coords[0][1], $btn_coords[0][2], $btn_coords[0][3], $x, $y, 70 )
 				if $search=1 Then
-					;MouseMove($btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1)
-					;sleep(200)
-					;MouseClick('left',$btn_coords[0][0]+($btn_coords[0][2]-$btn_coords[0][0])/2, $btn_coords[0][1]+($btn_coords[0][3]-$btn_coords[0][1])/2,1,1)
 					send("q")
-					;;;;;;;;;;
+					;--------------------------------------
 					;	wait fleet will be in attack action
-					; start TimerDiff
 					local $timer=TimerInit()
 					While TimerDiff($timer)<$wait_attack_max_time
 						local $i=$Fleet
@@ -1051,13 +836,7 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 					wend
 					ConsoleWrite('Fleet '&$Fleet&' not in action in '&TimerDiff($timer)&' milliseconds, return fleet'&@CRLF)
 					VEGA_ReturnFleet($Fleet)
-					;end TimerDiff exceeded
-					; return fleet
-					;;;;;;;;;;;;;;
-
-					;sleep (2500)
 					return 1
-					;sleep (1000)
 				EndIf
 			else
 				ConsoleWrite(_NowTime(5)&' press Return ?'&@CRLF)
@@ -1076,7 +855,6 @@ Func VEGA_FindTarget($Fleet, $VEGA_Target_numb=-1)
 EndFunc
 
 func VEGA_attack_target($fleet, $target=-1)
-
    VEGA_FindTarget($fleet,$target)
 EndFunc
 
